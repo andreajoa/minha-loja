@@ -26,12 +26,12 @@ export default function AddToCartButton({
       type="button"
       onClick={handleAdd}
       disabled={disabled}
-      className={`rounded-full bg-teal font-bold text-white shadow-sm transition hover:bg-teal-dark focus:outline-none focus:ring-4 focus:ring-teal/25 disabled:cursor-not-allowed disabled:opacity-50 ${
-        compact ? "px-5 py-2.5 text-sm" : "w-full px-8 py-4 md:w-auto"
+      className={`inline-flex items-center justify-center rounded-sm bg-ardosia font-bold uppercase tracking-[0.12em] text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-coral focus:outline-none focus:ring-4 focus:ring-coral/20 disabled:cursor-not-allowed disabled:opacity-50 ${
+        compact ? "min-h-11 px-5 text-[10px]" : "min-h-14 w-full px-8 text-xs md:w-auto"
       }`}
       aria-live="polite"
     >
-      {disabled ? "Produto esgotado" : added ? "Adicionado ao carrinho" : "Adicionar ao carrinho"}
+      {disabled ? "Produto esgotado" : added ? "Adicionado" : "Adicionar ao carrinho"}
     </button>
   );
 }
