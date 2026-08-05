@@ -1,11 +1,9 @@
 import { clerkMiddleware } from "@clerk/nextjs/server";
 
+// A vitrine é totalmente pública. A Clerk só participa do endpoint
+// administrativo que realmente precisa identificar um usuário autorizado.
 export default clerkMiddleware();
 
 export const config = {
-  matcher: [
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    "/(api|trpc)(.*)",
-    "/__clerk/(.*)",
-  ],
+  matcher: ["/api/admin/upload(.*)"],
 };
