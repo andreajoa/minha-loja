@@ -9,6 +9,12 @@ export type Product = {
   stock: number;
   ageRange: string;
   benefits: string[];
+  shipping: {
+    weightGrams: number;
+    lengthCm: number;
+    widthCm: number;
+    heightCm: number;
+  };
 };
 
 const r2BaseUrl = (process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL || "").replace(/\/$/, "");
@@ -30,6 +36,7 @@ export const products: Product[] = [
     stock: 30,
     ageRange: "A partir de 5 anos",
     benefits: ["Coordenação motora fina", "Apoio à concentração", "Exploração tátil"],
+    shipping: { weightGrams: 250, lengthCm: 12, widthCm: 12, heightCm: 12 },
   },
   {
     id: "prod_002",
@@ -43,6 +50,7 @@ export const products: Product[] = [
     stock: 15,
     ageRange: "Consulte as medidas",
     benefits: ["Ajuste confortável", "Tecido respirável", "Fechamento regulável"],
+    shipping: { weightGrams: 500, lengthCm: 30, widthCm: 25, heightCm: 8 },
   },
   {
     id: "prod_003",
@@ -56,6 +64,7 @@ export const products: Product[] = [
     stock: 40,
     ageRange: "A partir de 3 anos",
     benefits: ["Planejamento motor", "Raciocínio espacial", "Criatividade"],
+    shipping: { weightGrams: 900, lengthCm: 30, widthCm: 25, heightCm: 20 },
   },
   {
     id: "prod_004",
@@ -69,6 +78,7 @@ export const products: Product[] = [
     stock: 22,
     ageRange: "A partir de 3 anos",
     benefits: ["Discriminação tátil", "Vocabulário descritivo", "Brincadeira compartilhada"],
+    shipping: { weightGrams: 600, lengthCm: 35, widthCm: 30, heightCm: 12 },
   },
   {
     id: "prod_005",
@@ -82,6 +92,7 @@ export const products: Product[] = [
     stock: 18,
     ageRange: "A partir de 4 anos",
     benefits: ["Previsibilidade", "Sequenciamento", "Comunicação visual"],
+    shipping: { weightGrams: 300, lengthCm: 25, widthCm: 20, heightCm: 5 },
   },
   {
     id: "prod_006",
@@ -95,6 +106,7 @@ export const products: Product[] = [
     stock: 60,
     ageRange: "A partir de 3 anos",
     benefits: ["Coordenação bilateral", "Contagem", "Treino de turnos"],
+    shipping: { weightGrams: 150, lengthCm: 15, widthCm: 15, heightCm: 2 },
   },
 ];
 

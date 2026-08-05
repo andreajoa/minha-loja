@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import AddToCartButton from "@/components/AddToCartButton";
 import ProductCard from "@/components/ProductCard";
+import ShippingCalculator from "@/components/ShippingCalculator";
 import { formatPrice, products } from "@/data/products";
 
 export function generateStaticParams() {
@@ -72,7 +73,7 @@ export default async function ProductPage({
             <div className="mt-8 rounded-[2rem] border border-border/50 bg-white p-6 shadow-[0_20px_55px_rgba(9,38,71,0.08)] sm:p-8">
               <p className="text-[10px] font-black uppercase tracking-[0.16em] text-muted">Valor do produto</p>
               <p className="mt-2 font-display text-5xl text-primary">{formatPrice(product.price)}</p>
-              <p className="mt-3 text-sm font-bold text-text-light">Pagamento seguro por cartão no ambiente da Stripe.</p>
+              <p className="mt-3 text-sm font-bold text-text-light">Pagamento seguro por cartão no checkout incorporado da Stripe.</p>
 
               <div className="mt-7 flex flex-col gap-4 sm:flex-row sm:items-center">
                 <AddToCartButton productId={product.id} disabled={product.stock <= 0} />
@@ -80,6 +81,14 @@ export default async function ProductPage({
                   {product.stock > 0 ? `${product.stock} unidades disponíveis` : "Produto esgotado"}
                 </p>
               </div>
+            </div>
+
+            <div className="mt-6">
+              <ShippingCalculator
+                cart={[{ id: product.id, quantity: 1 }]}
+                compact
+                title="Quanto custa entregar este produto?"
+              />
             </div>
 
             <div className="mt-8 grid gap-4 sm:grid-cols-2">
@@ -117,7 +126,7 @@ export default async function ProductPage({
         </div>
 
         {relatedProducts.length > 0 ? (
-          <section className="reveal-section border-t border-border/50 pt-16 mt-20 sm:pt-20">
+          <section className="reveal-section mt-20 border-t border-border/50 pt-16 sm:pt-20">
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.2em] text-secondary">Você também pode gostar</p>
