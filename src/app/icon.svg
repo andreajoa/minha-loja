@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="BrinqueTEAndo">
+  <rect width="64" height="64" rx="18" fill="#F2E6DE"/>
+  <path d="M17 23c0-5 4-9 9-9h12c5 0 9 4 9 9v18c0 5-4 9-9 9H26c-5 0-9-4-9-9V23Z" fill="#092647"/>
+  <circle cx="26" cy="27" r="4" fill="#CA936D"/>
+  <circle cx="38" cy="27" r="4" fill="#A14D2D"/>
+  <path d="M24 39c3 3 13 3 16 0" fill="none" stroke="#FDF9F6" stroke-width="4" stroke-linecap="round"/>
+</svg>
