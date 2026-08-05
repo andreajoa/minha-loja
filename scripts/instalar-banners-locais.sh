@@ -10,6 +10,12 @@ if [[ ! -d "$SOURCE_DIR" ]]; then
   exit 1
 fi
 
+if [[ -n "$(git -C "$PROJECT_ROOT" status --porcelain)" ]]; then
+  echo "O projeto possui alterações locais não salvas. Faça commit ou guarde essas alterações antes de instalar os banners."
+  git -C "$PROJECT_ROOT" status --short
+  exit 1
+fi
+
 mkdir -p "$DEST_DIR"
 
 files=()
