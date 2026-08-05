@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import "./commerce.css";
 import Header from "@/components/Header";
@@ -16,6 +15,9 @@ export const metadata: Metadata = {
   description:
     "Brinquedos sensoriais e pedagógicos para crianças com autismo e TDAH, com curadoria de Margareth Almeida, Neuropsicopedagoga.",
   alternates: { canonical: "/brinqueteando" },
+  icons: {
+    icon: "/brinqueteando/icon.svg",
+  },
   openGraph: {
     title: "BrinqueTEAndo",
     description:
@@ -36,17 +38,15 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ClerkProvider>
-      <html lang="pt-BR">
-        <body className="flex min-h-screen flex-col antialiased">
-          <CartProvider>
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
-            <CookieBar />
-          </CartProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="pt-BR">
+      <body className="flex min-h-screen flex-col antialiased">
+        <CartProvider>
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+          <CookieBar />
+        </CartProvider>
+      </body>
+    </html>
   );
 }
