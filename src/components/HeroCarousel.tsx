@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
+const basePath = "/brinqueteando";
+
 const slides = [
   {
-    image: "/banners/banner-01-brincar-com-proposito.png",
+    image: `${basePath}/banners/banner-01-brincar-com-proposito.png`,
     href: "/colecoes",
     title: "Brincar com propósito",
     description:
@@ -13,7 +15,7 @@ const slides = [
     cta: "Explorar produtos",
   },
   {
-    image: "/banners/banner-02-escolher-com-clareza.png",
+    image: `${basePath}/banners/banner-02-escolher-com-clareza.png`,
     href: "/colecoes",
     title: "Como escolher com mais clareza",
     description:
@@ -21,7 +23,7 @@ const slides = [
     cta: "Ver coleções",
   },
   {
-    image: "/banners/banner-03-menos-excesso-mais-intencao.png",
+    image: `${basePath}/banners/banner-03-menos-excesso-mais-intencao.png`,
     href: "/sobre",
     title: "Menos excesso, mais intenção",
     description:
@@ -29,7 +31,7 @@ const slides = [
     cta: "Aprender a escolher",
   },
   {
-    image: "/banners/banner-04-mediacao-transforma.png",
+    image: `${basePath}/banners/banner-04-mediacao-transforma.png`,
     href: "/contato",
     title: "O brinquedo ajuda. A mediação transforma.",
     description:
