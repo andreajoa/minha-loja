@@ -219,37 +219,38 @@ async function quoteCorreios(cep: string, cart: CartLine[]): Promise<ShippingOpt
   const deadlineData = deadlineResponse.ok
     ? asArray(await deadlineResponse.json())
     : [];
+  const options: ShippingOption[] = [];
 
-  return serviceCodes
-    .map((code) => {
-      const price = priceData.find(
-        (item) => String(item.coProduto || item.codigoProduto || "") === code,
-      );
-      if (!price) return null;
-      const amount = parseMoney(price.pcFinal ?? price.precoFinal ?? price.valor);
-      if (amount <= 0) return null;
+  for (const code of serviceCodes) {
+    const price = priceData.find(
+      (item) => String(item.coProduto || item.codigoProduto || "") === code,
+    );
+    if (!price) continue;
 
-      const deadline = deadlineData.find(
-        (item) => String(item.coProduto || item.codigoProduto || "") === code,
-      );
-      const days = parseDays(
-        deadline?.prazoEntrega ?? deadline?.prazo ?? deadline?.dias,
-        code === "03220" || code === "04162" ? 5 : 10,
-      );
+    const amount = parseMoney(price.pcFinal ?? price.precoFinal ?? price.valor);
+    if (amount <= 0) continue;
 
-      return {
-        id: `correios-${code}`,
-        label: serviceName(code),
-        description: `Entrega estimada em até ${days} dias úteis`,
-        amount,
-        minimumDays: Math.max(1, days - 2),
-        maximumDays: days,
-        source: "correios" as const,
-        serviceCode: code,
-      };
-    })
-    .filter((option): option is ShippingOption => Boolean(option))
-    .sort((a, b) => a.amount - b.amount);
+    const deadline = deadlineData.find(
+      (item) => String(item.coProduto || item.codigoProduto || "") === code,
+    );
+    const days = parseDays(
+      deadline?.prazoEntrega ?? deadline?.prazo ?? deadline?.dias,
+      code === "03220" || code === "04162" ? 5 : 10,
+    );
+
+    options.push({
+      id: `correios-${code}`,
+      label: serviceName(code),
+      description: `Entrega estimada em até ${days} dias úteis`,
+      amount,
+      minimumDays: Math.max(1, days - 2),
+      maximumDays: days,
+      source: "correios",
+      serviceCode: code,
+    });
+  }
+
+  return options.sort((a, b) => a.amount - b.amount);
 }
 
 export async function quoteShipping(cepValue: string, cart: CartLine[]): Promise<ShippingQuote> {
