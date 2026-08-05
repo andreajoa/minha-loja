@@ -119,7 +119,7 @@ export default function PostPurchaseOffer({ sessionId }: { sessionId: string }) 
 
     embeddedCheckoutRef.current?.destroy();
     if (embeddedContainerRef.current) embeddedContainerRef.current.innerHTML = "";
-    const checkout = await stripe.initEmbeddedCheckout({
+    const checkout = await stripe.createEmbeddedCheckoutPage({
       fetchClientSecret: async () => clientSecret,
     });
     embeddedCheckoutRef.current = checkout;
