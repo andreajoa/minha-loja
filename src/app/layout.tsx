@@ -1,23 +1,51 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CookieBar from "@/components/CookieBar";
+import CartProvider from "@/components/CartProvider";
 
 export const metadata: Metadata = {
-  title: "BrinqueTEAndo — Brinquedos para criancas atipicas",
-  description: "Loja de brinquedos sensoriais e pedagogicos para criancas com TDAH e autismo. Curadoria de Margareth Almeida, Neuropsicopedagoga.",
+  metadataBase: new URL("https://www.adhdautism.online"),
+  title: {
+    default: "BrinqueTEAndo | Brinquedos sensoriais e pedagógicos",
+    template: "%s | BrinqueTEAndo",
+  },
+  description:
+    "Brinquedos sensoriais e pedagógicos para crianças com autismo e TDAH, com curadoria de Margareth Almeida, Neuropsicopedagoga.",
+  alternates: { canonical: "/brinqueteando" },
+  openGraph: {
+    title: "BrinqueTEAndo",
+    description:
+      "Recursos escolhidos para apoiar o brincar, a comunicação e o desenvolvimento infantil.",
+    url: "/brinqueteando",
+    siteName: "BrinqueTEAndo",
+    locale: "pt_BR",
+    type: "website",
+  },
+  robots: { index: true, follow: true },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#5EB8B3",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR">
-      <body className="flex min-h-screen flex-col">
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <CookieBar />
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="pt-BR">
+        <body className="flex min-h-screen flex-col antialiased">
+          <CartProvider>
+            <Header />
+            <main className="flex-1">{children}</main>
+            <Footer />
+            <CookieBar />
+          </CartProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
