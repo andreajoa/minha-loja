@@ -98,7 +98,7 @@ export const products: Product[] = [
   },
 ];
 
-export const categories = ["Todos", "Fidget", "Sensorial", "Motor", "Comunicação"];
+export const categories = ["Todos", ...Array.from(new Set(products.map((product) => product.category)))];
 
 export function formatPrice(price: number) {
   return new Intl.NumberFormat("pt-BR", {
