@@ -2,10 +2,9 @@
 
 import Link from "next/link";
 import {
+  Show,
   SignInButton,
   SignUpButton,
-  SignedIn,
-  SignedOut,
   UserButton,
 } from "@clerk/nextjs";
 import { useCart } from "@/components/CartProvider";
@@ -40,7 +39,7 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <SignedOut>
+          <Show when="signed-out">
             <SignInButton mode="modal">
               <button
                 type="button"
@@ -57,15 +56,15 @@ export default function Header() {
                 Criar conta
               </button>
             </SignUpButton>
-          </SignedOut>
+          </Show>
 
-          <SignedIn>
+          <Show when="signed-in">
             <UserButton
               appearance={{
                 elements: { avatarBox: "h-9 w-9" },
               }}
             />
-          </SignedIn>
+          </Show>
 
           <Link
             href="/carrinho"
