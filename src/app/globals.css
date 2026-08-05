@@ -1,19 +1,68 @@
 @import "tailwindcss";
 
 @theme {
-  --color-teal: #5EB8B3;
-  --color-teal-dark: #3E9B96;
-  --color-amarelo: #F6C453;
-  --color-lavanda: #B8A9DB;
-  --color-menta: #8FCB9B;
-  --color-coral: #F58B7C;
-  --color-creme: #FBF8F3;
-  --color-ardosia: #33404A;
-  --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --color-teal: #5eb8b3;
+  --color-teal-dark: #347f7b;
+  --color-amarelo: #f6c453;
+  --color-lavanda: #b8a9db;
+  --color-menta: #8fcb9b;
+  --color-coral: #e97868;
+  --color-creme: #fbf8f3;
+  --color-ardosia: #33404a;
+  --font-sans: var(--font-sans-system);
+}
+
+:root {
+  --font-sans-system: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
+  margin: 0;
   background: var(--color-creme);
   color: var(--color-ardosia);
-  font-family: var(--font-sans);
+  font-family: var(--font-sans-system);
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-teal) 35%, white);
+}
+
+.prose h1,
+.prose h2,
+.prose h3 {
+  color: var(--color-ardosia);
+}
+
+.prose p,
+.prose li {
+  line-height: 1.75;
+}
+
+.prose a {
+  color: var(--color-teal-dark);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
