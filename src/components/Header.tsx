@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import { useCart } from "@/components/CartProvider";
 import ShippingAnnouncement from "@/components/ShippingAnnouncement";
 import { categories } from "@/data/products";
@@ -21,16 +20,12 @@ export default function Header() {
 
       <div className="mx-auto grid max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center px-4 py-4 sm:px-7">
         <div className="flex items-center">
-          <Show when="signed-out">
-            <SignInButton mode="modal">
-              <button type="button" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-text-light transition hover:text-secondary">
-                <Icon>♙</Icon><span className="hidden lg:inline">Entrar</span>
-              </button>
-            </SignInButton>
-          </Show>
-          <Show when="signed-in">
-            <UserButton appearance={{ elements: { avatarBox: "h-9 w-9" } }} />
-          </Show>
+          <Link
+            href="/contato"
+            className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-text-light transition hover:text-secondary"
+          >
+            <Icon>♡</Icon><span className="hidden lg:inline">Atendimento</span>
+          </Link>
         </div>
 
         <Link href="/" className="group font-display text-2xl tracking-[0.08em] text-primary sm:text-3xl" aria-label="BrinqueTEAndo — página inicial">
@@ -42,13 +37,6 @@ export default function Header() {
           <Link href="/colecoes" className="hidden items-center gap-2 text-xs font-black uppercase tracking-[0.12em] text-text-light transition hover:text-secondary md:flex">
             <Icon>⌕</Icon><span>Buscar</span>
           </Link>
-          <Show when="signed-out">
-            <SignUpButton mode="modal">
-              <button type="button" className="hidden rounded-full border border-border/70 px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-secondary transition hover:border-secondary hover:bg-secondary hover:text-white lg:inline-flex">
-                Criar conta
-              </button>
-            </SignUpButton>
-          </Show>
           <Link
             href="/carrinho"
             className="group relative ml-1 flex h-11 w-11 items-center justify-center rounded-full bg-secondary text-white shadow-[0_10px_24px_rgba(161,77,45,0.2)] transition hover:-translate-y-1 hover:bg-primary"
