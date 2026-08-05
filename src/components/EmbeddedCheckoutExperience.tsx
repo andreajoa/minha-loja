@@ -72,7 +72,7 @@ export default function EmbeddedCheckoutExperience({ cep, shippingId }: Props) {
         const stripe = await loadStripe(publishableKey);
         if (!stripe) throw new Error("Não foi possível carregar o pagamento seguro.");
 
-        const checkout = await stripe.initEmbeddedCheckout({
+        const checkout = await stripe.createEmbeddedCheckoutPage({
           fetchClientSecret: async () => {
             const response = await fetch(withBasePath("/api/checkout/embedded"), {
               method: "POST",
