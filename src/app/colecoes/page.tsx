@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
-import CollectionCatalog from "@/components/CollectionCatalog";
+import CollectionCatalogLoader from "@/components/CollectionCatalogLoader";
 import { categories, products } from "@/data/products";
+
+export const dynamic = "force-static";
 
 export const metadata: Metadata = {
   title: "Coleções e brinquedos",
@@ -8,14 +10,7 @@ export const metadata: Metadata = {
     "Encontre brinquedos sensoriais e pedagógicos por categoria, faixa etária, objetivo, disponibilidade e preço.",
 };
 
-export default async function Colecoes({
-  searchParams,
-}: {
-  searchParams: Promise<{ categoria?: string }>;
-}) {
-  const { categoria } = await searchParams;
-  const initialCategory = categoria && categories.includes(categoria) ? categoria : "Todos";
-
+export default function Colecoes() {
   return (
     <div className="min-h-screen bg-background">
       <section className="hero-grid relative overflow-hidden border-b border-border/45 px-5 py-14 sm:py-18 lg:py-22">
@@ -54,11 +49,7 @@ export default async function Colecoes({
         </div>
       </section>
 
-      <CollectionCatalog
-        products={products}
-        categories={categories}
-        initialCategory={initialCategory}
-      />
+      <CollectionCatalogLoader products={products} categories={categories} />
     </div>
   );
 }
