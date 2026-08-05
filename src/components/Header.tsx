@@ -15,8 +15,8 @@ export default function Header() {
   const menuCategories = categories.filter((category) => category !== "Todos").slice(0, 5);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-ardosia/10 bg-creme/95 backdrop-blur-xl">
-      <div className="bg-ardosia px-4 py-2 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-white/85 sm:text-xs">
+    <header className="sticky top-0 z-50 border-b border-border/50 bg-background/95 backdrop-blur-xl">
+      <div className="bg-primary px-4 py-2 text-center text-[10px] font-black uppercase tracking-[0.18em] text-white/85 sm:text-xs">
         Curadoria neuropsicopedagógica para escolhas mais conscientes no brincar
       </div>
 
@@ -24,7 +24,7 @@ export default function Header() {
         <div className="flex items-center">
           <Show when="signed-out">
             <SignInButton mode="modal">
-              <button type="button" className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-ardosia/70 hover:text-ardosia">
+              <button type="button" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-text-light transition hover:text-secondary">
                 <Icon>♙</Icon><span className="hidden lg:inline">Entrar</span>
               </button>
             </SignInButton>
@@ -34,38 +34,43 @@ export default function Header() {
           </Show>
         </div>
 
-        <Link href="/" className="font-display text-2xl tracking-[0.08em] text-ardosia sm:text-3xl" aria-label="BrinqueTEAndo — página inicial">
-          BRINQUE<span className="text-coral">TEA</span>NDO
+        <Link href="/" className="group font-display text-2xl tracking-[0.08em] text-primary sm:text-3xl" aria-label="BrinqueTEAndo — página inicial">
+          BRINQUE<span className="text-secondary transition group-hover:text-secondary-light">TEA</span>NDO
+          <span className="mx-auto mt-1 block h-1 w-8 rounded-full bg-secondary transition-all group-hover:w-14" />
         </Link>
 
         <div className="flex items-center justify-end gap-1 sm:gap-2">
-          <Link href="/colecoes" className="hidden items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-ardosia/70 hover:text-ardosia md:flex">
+          <Link href="/colecoes" className="hidden items-center gap-2 text-xs font-black uppercase tracking-[0.12em] text-text-light transition hover:text-secondary md:flex">
             <Icon>⌕</Icon><span>Buscar</span>
           </Link>
           <Show when="signed-out">
             <SignUpButton mode="modal">
-              <button type="button" className="hidden border-l border-ardosia/15 pl-4 text-xs font-bold uppercase tracking-[0.12em] text-coral hover:text-ardosia lg:inline-flex">
+              <button type="button" className="hidden rounded-full border border-border/70 px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-secondary transition hover:border-secondary hover:bg-secondary hover:text-white lg:inline-flex">
                 Criar conta
               </button>
             </SignUpButton>
           </Show>
-          <Link href="/carrinho" className="relative flex items-center" aria-label={`Carrinho com ${itemCount} item${itemCount === 1 ? "" : "s"}`}>
-            <Icon>🛒</Icon>
-            <span className="absolute -right-1 -top-1 flex min-h-5 min-w-5 items-center justify-center rounded-full bg-coral px-1 text-[10px] font-bold text-white">{itemCount}</span>
+          <Link
+            href="/carrinho"
+            className="group relative ml-1 flex h-11 w-11 items-center justify-center rounded-full bg-secondary text-white shadow-[0_10px_24px_rgba(161,77,45,0.2)] transition hover:-translate-y-1 hover:bg-primary"
+            aria-label={`Carrinho com ${itemCount} item${itemCount === 1 ? "" : "s"}`}
+          >
+            <span className="transition group-hover:scale-110" aria-hidden="true">🛒</span>
+            <span className="absolute -right-1 -top-1 flex min-h-5 min-w-5 items-center justify-center rounded-full border-2 border-background bg-primary px-1 text-[10px] font-black text-white">{itemCount}</span>
           </Link>
         </div>
       </div>
 
-      <nav className="border-t border-ardosia/10" aria-label="Menu principal">
-        <div className="mx-auto flex max-w-[1440px] items-center gap-7 overflow-x-auto px-4 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-ardosia/72 sm:justify-center sm:px-7">
-          <Link href="/sobre" className="shrink-0 hover:text-coral">Nossa curadoria</Link>
+      <nav className="border-t border-border/45" aria-label="Menu principal">
+        <div className="mx-auto flex max-w-[1440px] items-center gap-7 overflow-x-auto px-4 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-text-light sm:justify-center sm:px-7">
+          <Link href="/sobre" className="nav-link shrink-0 hover:text-secondary">Nossa curadoria</Link>
           {menuCategories.map((category) => (
-            <Link key={category} href={`/colecoes?categoria=${encodeURIComponent(category)}`} className="shrink-0 hover:text-coral">
+            <Link key={category} href={`/colecoes?categoria=${encodeURIComponent(category)}`} className="nav-link shrink-0 hover:text-secondary">
               {category}
             </Link>
           ))}
-          <Link href="/colecoes" className="shrink-0 hover:text-coral">Todos os produtos</Link>
-          <Link href="/contato" className="shrink-0 hover:text-coral">Ajuda</Link>
+          <Link href="/colecoes" className="nav-link shrink-0 hover:text-secondary">Todos os produtos</Link>
+          <Link href="/contato" className="nav-link shrink-0 hover:text-secondary">Ajuda</Link>
         </div>
       </nav>
     </header>

@@ -4,8 +4,9 @@ import { formatPrice, type Product } from "@/data/products";
 
 export default function ProductCard({ product }: { product: Product }) {
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-sm border border-ardosia/10 bg-white transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_55px_rgba(61,42,32,0.12)]">
-      <Link href={`/produto/${product.id}`} className="relative block aspect-square overflow-hidden bg-oat">
+    <article className="brand-card group flex h-full flex-col overflow-hidden rounded-[2rem] border border-border/50 bg-white">
+      <Link href={`/produto/${product.id}`} className="relative block aspect-square overflow-hidden bg-background-alt">
+        <div className="absolute -right-10 -top-10 z-10 h-28 w-28 rounded-full border border-secondary-light/30" />
         {product.image ? (
           <img
             src={product.image}
@@ -14,28 +15,28 @@ export default function ProductCard({ product }: { product: Product }) {
             loading="lazy"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(circle_at_50%_42%,rgba(255,255,255,0.9),transparent_42%),linear-gradient(145deg,#dfe8df,#f5eee7_55%,#e8d7d1)]">
-            <span className="text-8xl drop-shadow-[0_18px_25px_rgba(61,42,32,0.12)]" aria-hidden="true">{product.emoji}</span>
+          <div className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(circle_at_50%_42%,rgba(255,255,255,0.94),transparent_40%),linear-gradient(145deg,#FDF9F6,#F2E6DE_58%,#E5D0C3)]">
+            <span className="category-emoji text-8xl drop-shadow-[0_20px_26px_rgba(9,38,71,0.16)]" aria-hidden="true">{product.emoji}</span>
           </div>
         )}
-        <span className="absolute left-4 top-4 bg-white/92 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-coral backdrop-blur">
+        <span className="absolute left-4 top-4 z-20 rounded-full bg-background/92 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-secondary shadow-sm backdrop-blur">
           {product.category}
         </span>
       </Link>
 
       <div className="flex flex-1 flex-col p-5 sm:p-6">
-        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-ardosia/45">{product.ageRange}</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.16em] text-muted">{product.ageRange}</p>
         <Link href={`/produto/${product.id}`}>
-          <h3 className="mt-2 font-display text-3xl leading-none transition group-hover:text-coral">{product.name}</h3>
+          <h3 className="mt-2 font-display text-3xl leading-none text-primary transition group-hover:text-secondary">{product.name}</h3>
         </Link>
-        <p className="mt-4 line-clamp-3 text-sm leading-6 text-ardosia/65">{product.description}</p>
+        <p className="mt-4 line-clamp-3 text-sm leading-6 text-text-light">{product.description}</p>
         <div className="mt-auto pt-6">
           <div className="mb-4 flex items-end justify-between gap-3">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-ardosia/40">Valor</p>
-              <p className="font-display text-3xl">{formatPrice(product.price)}</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-muted">Valor</p>
+              <p className="font-display text-3xl text-primary">{formatPrice(product.price)}</p>
             </div>
-            <span className={`text-xs font-bold ${product.stock > 0 ? "text-sage-dark" : "text-coral"}`}>
+            <span className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.1em] ${product.stock > 0 ? "bg-background-alt text-text-light" : "bg-secondary/10 text-secondary"}`}>
               {product.stock > 0 ? "Em estoque" : "Esgotado"}
             </span>
           </div>
