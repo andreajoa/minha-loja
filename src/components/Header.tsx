@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import { useCart } from "@/components/CartProvider";
+import ShippingAnnouncement from "@/components/ShippingAnnouncement";
 import { categories } from "@/data/products";
 
 function Icon({ children }: { children: ReactNode }) {
@@ -16,9 +17,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/50 bg-background/95 backdrop-blur-xl">
-      <div className="bg-primary px-4 py-2 text-center text-[10px] font-black uppercase tracking-[0.18em] text-white/85 sm:text-xs">
-        Curadoria neuropsicopedagógica para escolhas mais conscientes no brincar
-      </div>
+      <ShippingAnnouncement />
 
       <div className="mx-auto grid max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center px-4 py-4 sm:px-7">
         <div className="flex items-center">
