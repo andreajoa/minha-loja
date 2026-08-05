@@ -1,90 +1,72 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Show,
-  SignInButton,
-  SignUpButton,
-  UserButton,
-} from "@clerk/nextjs";
+import type { ReactNode } from "react";
+import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import { useCart } from "@/components/CartProvider";
+import { categories } from "@/data/products";
+
+function Icon({ children }: { children: ReactNode }) {
+  return <span className="flex h-9 w-9 items-center justify-center text-lg" aria-hidden="true">{children}</span>;
+}
 
 export default function Header() {
   const { itemCount } = useCart();
+  const menuCategories = categories.filter((category) => category !== "Todos").slice(0, 5);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-teal/10 bg-creme/95 backdrop-blur-xl">
-      <div className="bg-ardosia px-4 py-2 text-center text-xs font-semibold text-white">
+    <header className="sticky top-0 z-50 border-b border-ardosia/10 bg-creme/95 backdrop-blur-xl">
+      <div className="bg-ardosia px-4 py-2 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-white/85 sm:text-xs">
         Curadoria neuropsicopedagógica para escolhas mais conscientes no brincar
       </div>
 
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4">
-        <Link href="/" className="shrink-0 text-2xl font-black tracking-tight text-ardosia">
-          Brinque<span className="text-teal-dark">TEA</span>ndo
-        </Link>
-
-        <nav className="hidden items-center gap-6 text-sm font-bold md:flex" aria-label="Menu principal">
-          <Link href="/" className="transition hover:text-teal-dark">
-            Início
-          </Link>
-          <Link href="/colecoes" className="transition hover:text-teal-dark">
-            Produtos
-          </Link>
-          <Link href="/sobre" className="transition hover:text-teal-dark">
-            Nossa curadoria
-          </Link>
-          <Link href="/contato" className="transition hover:text-teal-dark">
-            Ajuda
-          </Link>
-        </nav>
-
-        <div className="flex items-center gap-2 sm:gap-3">
+      <div className="mx-auto grid max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center px-4 py-4 sm:px-7">
+        <div className="flex items-center">
           <Show when="signed-out">
             <SignInButton mode="modal">
-              <button
-                type="button"
-                className="hidden rounded-full px-4 py-2 text-sm font-bold transition hover:bg-teal/10 sm:inline-flex"
-              >
-                Entrar
+              <button type="button" className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-ardosia/70 hover:text-ardosia">
+                <Icon>♙</Icon><span className="hidden lg:inline">Entrar</span>
               </button>
             </SignInButton>
+          </Show>
+          <Show when="signed-in">
+            <UserButton appearance={{ elements: { avatarBox: "h-9 w-9" } }} />
+          </Show>
+        </div>
+
+        <Link href="/" className="font-display text-2xl tracking-[0.08em] text-ardosia sm:text-3xl" aria-label="BrinqueTEAndo — página inicial">
+          BRINQUE<span className="text-coral">TEA</span>NDO
+        </Link>
+
+        <div className="flex items-center justify-end gap-1 sm:gap-2">
+          <Link href="/colecoes" className="hidden items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-ardosia/70 hover:text-ardosia md:flex">
+            <Icon>⌕</Icon><span>Buscar</span>
+          </Link>
+          <Show when="signed-out">
             <SignUpButton mode="modal">
-              <button
-                type="button"
-                className="hidden rounded-full bg-ardosia px-4 py-2 text-sm font-bold text-white transition hover:bg-teal-dark sm:inline-flex"
-              >
+              <button type="button" className="hidden border-l border-ardosia/15 pl-4 text-xs font-bold uppercase tracking-[0.12em] text-coral hover:text-ardosia lg:inline-flex">
                 Criar conta
               </button>
             </SignUpButton>
           </Show>
-
-          <Show when="signed-in">
-            <UserButton
-              appearance={{
-                elements: { avatarBox: "h-9 w-9" },
-              }}
-            />
-          </Show>
-
-          <Link
-            href="/carrinho"
-            className="relative inline-flex items-center gap-2 rounded-full bg-teal px-4 py-2 text-sm font-black text-white shadow-sm transition hover:bg-teal-dark"
-            aria-label={`Carrinho com ${itemCount} item${itemCount === 1 ? "" : "s"}`}
-          >
-            <span aria-hidden="true">🛒</span>
-            <span className="hidden sm:inline">Carrinho</span>
-            <span className="flex min-w-6 items-center justify-center rounded-full bg-white px-1.5 py-0.5 text-xs text-teal-dark">
-              {itemCount}
-            </span>
+          <Link href="/carrinho" className="relative flex items-center" aria-label={`Carrinho com ${itemCount} item${itemCount === 1 ? "" : "s"}`}>
+            <Icon>🛒</Icon>
+            <span className="absolute -right-1 -top-1 flex min-h-5 min-w-5 items-center justify-center rounded-full bg-coral px-1 text-[10px] font-bold text-white">{itemCount}</span>
           </Link>
         </div>
       </div>
 
-      <nav className="flex items-center justify-center gap-5 overflow-x-auto border-t border-teal/10 px-4 py-3 text-sm font-bold md:hidden">
-        <Link href="/">Início</Link>
-        <Link href="/colecoes">Produtos</Link>
-        <Link href="/sobre">Curadoria</Link>
-        <Link href="/contato">Ajuda</Link>
+      <nav className="border-t border-ardosia/10" aria-label="Menu principal">
+        <div className="mx-auto flex max-w-[1440px] items-center gap-7 overflow-x-auto px-4 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-ardosia/72 sm:justify-center sm:px-7">
+          <Link href="/sobre" className="shrink-0 hover:text-coral">Nossa curadoria</Link>
+          {menuCategories.map((category) => (
+            <Link key={category} href={`/colecoes?categoria=${encodeURIComponent(category)}`} className="shrink-0 hover:text-coral">
+              {category}
+            </Link>
+          ))}
+          <Link href="/colecoes" className="shrink-0 hover:text-coral">Todos os produtos</Link>
+          <Link href="/contato" className="shrink-0 hover:text-coral">Ajuda</Link>
+        </div>
       </nav>
     </header>
   );
