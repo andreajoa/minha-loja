@@ -69,7 +69,7 @@ async function createFallbackCheckout({
   const appUrl = appUrlFor(req);
 
   const session = await stripe.checkout.sessions.create({
-    ui_mode: "embedded",
+    ui_mode: "embedded_page",
     mode: "payment",
     payment_method_types: ["card"],
     ...(customer ? { customer } : { customer_creation: "always" as const }),
