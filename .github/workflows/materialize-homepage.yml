@@ -1,0 +1,58 @@
+name: Materializar homepage
+
+on:
+  pull_request:
+    branches:
+      - staging/homepage-materializer
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar branch de correção
+        uses: actions/checkout@v4
+        with:
+          ref: fix/homepage-images-direct
+          fetch-depth: 0
+
+      - name: Materializar arquivos finais
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf public/home-images
+          mkdir -p public/home-images
+          tar -xzf assets/home-images.tar.gz -C public/home-images
+
+          cat assets/storefront-00.b64 \
+              assets/storefront-01.b64 \
+              assets/storefront-02.b64 \
+              assets/storefront-03.b64 \
+              assets/storefront-04.b64 \
+              assets/storefront-05.b64 \
+              assets/storefront-06.b64 \
+              assets/storefront-07.b64 \
+            | tr -d '\r\n' \
+            | base64 --decode \
+            > src/components/StorefrontHome.tsx
+
+          count="$(find public/home-images -maxdepth 1 -type f -name '*.webp' | wc -l | tr -d ' ')"
+          test "$count" = "19"
+          test -s src/components/StorefrontHome.tsx
+          grep -q 'export default function StorefrontHome' src/components/StorefrontHome.tsx
+
+      - name: Registrar arquivos normais na branch de correção
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/home-images src/components/StorefrontHome.tsx
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "Adiciona homepage editorial como arquivos normais"
+          git push origin HEAD:fix/homepage-images-direct
