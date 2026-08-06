@@ -3,6 +3,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import "./commerce.css";
 import "./production-fixes.css";
+import "./instagram-strip.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CookieBar from "@/components/CookieBar";
