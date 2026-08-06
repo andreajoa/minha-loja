@@ -1,0 +1,13 @@
+/* Correções finais da vitrine de produção. */
+.reveal-section {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* As fotografias reais dos produtos não podem ser recortadas. */
+.storybook-shadow img[src*="cdn.shopify.com"],
+.hero-grid img[src*="cdn.shopify.com"] {
+  object-fit: contain !important;
+  background: #fdf9f6;
+  padding: clamp(1rem, 2.5vw, 2.25rem);
+}

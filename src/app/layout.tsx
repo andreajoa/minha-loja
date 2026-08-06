@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import "./commerce.css";
+import "./production-fixes.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CookieBar from "@/components/CookieBar";
@@ -15,12 +16,12 @@ export const metadata: Metadata = {
   },
   description:
     "Brinquedos sensoriais e pedagógicos para crianças com autismo e TDAH, com curadoria de Margareth Almeida, Neuropsicopedagoga.",
-  alternates: { canonical: "/brinqueteando" },
+  alternates: { canonical: "/" },
   openGraph: {
     title: "BrinqueTEAndo",
     description:
       "Recursos escolhidos para apoiar o brincar, a comunicação e o desenvolvimento infantil.",
-    url: "/brinqueteando",
+    url: "/",
     siteName: "BrinqueTEAndo",
     locale: "pt_BR",
     type: "website",

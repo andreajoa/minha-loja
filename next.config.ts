@@ -1,9 +1,29 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  basePath: "/brinqueteando",
   poweredByHeader: false,
   reactStrictMode: true,
+  async redirects() {
+    return [
+      {
+        source: "/brinqueteando",
+        destination: "/",
+        permanent: true,
+      },
+    ];
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/brinqueteando/banners/:path*",
+        destination: "/banners/:path*",
+      },
+      {
+        source: "/brinqueteando/home-sections/:path*",
+        destination: "/home-sections/:path*",
+      },
+    ];
+  },
   async headers() {
     return [
       {
