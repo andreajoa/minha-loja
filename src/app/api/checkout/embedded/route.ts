@@ -61,7 +61,7 @@ export async function POST(req: Request) {
     const cartMetadata = serializeCart(payload.cart);
 
     const session = await stripe.checkout.sessions.create({
-      ui_mode: "embedded",
+      ui_mode: "embedded_page",
       mode: "payment",
       payment_method_types: ["card"],
       customer_creation: "always",
