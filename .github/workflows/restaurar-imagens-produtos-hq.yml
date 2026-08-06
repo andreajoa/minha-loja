@@ -1,0 +1,150 @@
+name: Restaurar imagens dos produtos em alta resolução
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/restaurar-imagens-produtos-hq.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: restaurar-imagens-produtos-hq
+  cancel-in-progress: false
+
+jobs:
+  restaurar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Baixar o projeto
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar processador de imagens
+        run: python -m pip install --disable-pip-version-check pillow pillow-avif-plugin
+
+      - name: Restaurar as 101 imagens em alta resolução
+        shell: bash
+        run: |
+          set -euo pipefail
+          python <<'PY'
+          from io import BytesIO
+          from pathlib import Path
+          import json
+          import shutil
+          import time
+          import urllib.request
+
+          import pillow_avif
+          from PIL import Image, ImageFilter, ImageOps
+
+          manifest = json.loads(Path("tools/product-images-hq.json").read_text(encoding="utf-8"))
+          if len(manifest) != 101:
+              raise RuntimeError(f"Esperadas 101 imagens no manifesto; encontradas {len(manifest)}")
+
+          root = Path("public/products/catalog")
+          shutil.rmtree(root, ignore_errors=True)
+          root.mkdir(parents=True, exist_ok=True)
+
+          opener = urllib.request.build_opener()
+          opener.addheaders = [
+              ("User-Agent", "Mozilla/5.0 BrinqueTEAndo high-resolution importer"),
+              ("Accept", "image/avif,image/webp,image/png,image/jpeg,*/*"),
+          ]
+
+          dimensions = {}
+
+          for position, item in enumerate(manifest, 1):
+              destination = Path(item["path"])
+              destination.parent.mkdir(parents=True, exist_ok=True)
+
+              last_error = None
+              for attempt in range(5):
+                  try:
+                      with opener.open(item["url"], timeout=60) as response:
+                          data = response.read()
+
+                      image = Image.open(BytesIO(data))
+                      image = ImageOps.exif_transpose(image)
+
+                      width, height = image.size
+                      largest_side = max(width, height)
+
+                      # Mantém a resolução original. Apenas amplia fontes realmente pequenas
+                      # para evitar pixelização no card, sem cortar ou deformar o produto.
+                      if largest_side < 900:
+                          scale = 1000 / largest_side
+                          image = image.resize(
+                              (round(width * scale), round(height * scale)),
+                              Image.Resampling.LANCZOS,
+                          )
+                          image = image.filter(
+                              ImageFilter.UnsharpMask(radius=1.1, percent=105, threshold=3)
+                          )
+
+                      if "A" in image.getbands():
+                          image = image.convert("RGBA")
+                      else:
+                          image = image.convert("RGB")
+
+                      image.save(destination, "WEBP", quality=94, method=6)
+                      dimensions[str(destination)] = image.size
+                      print(
+                          f"[{position:03d}/{len(manifest)}] {destination} "
+                          f"{image.size[0]}x{image.size[1]} "
+                          f"{destination.stat().st_size / 1024:.1f} KB"
+                      )
+                      break
+                  except Exception as error:
+                      last_error = error
+                      if attempt == 4:
+                          raise
+                      time.sleep(2 * (attempt + 1))
+              else:
+                  raise RuntimeError(f"Falha ao baixar {item['url']}: {last_error}")
+
+          files = sorted(root.rglob("*.webp"))
+          if len(files) != 101:
+              raise RuntimeError(f"Esperadas 101 imagens salvas; encontradas {len(files)}")
+
+          primary_images = sorted(root.glob("*/01.webp"))
+          if len(primary_images) != 23:
+              raise RuntimeError(
+                  f"Esperadas 23 imagens principais; encontradas {len(primary_images)}"
+              )
+
+          for file in primary_images:
+              with Image.open(file) as image:
+                  if max(image.size) < 900:
+                      raise RuntimeError(
+                          f"Imagem principal abaixo da resolução mínima: {file} {image.size}"
+                      )
+
+          total_size = sum(file.stat().st_size for file in files)
+          print(f"Catálogo concluído: {len(files)} imagens, {total_size / 1024 / 1024:.2f} MB")
+          PY
+
+      - name: Remover arquivos temporários e publicar
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f tools/product-images-hq.json
+          rm -f .github/workflows/restaurar-imagens-produtos-hq.yml
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Restaura imagens dos produtos em alta resolução"
+          git pull --rebase origin main
+          git push origin HEAD:main
