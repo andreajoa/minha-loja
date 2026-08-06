@@ -9,13 +9,9 @@ permissions:
   contents: write
 
 jobs:
-  materialize-and-validate:
+  materialize:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-    env:
-      NEXT_PUBLIC_APP_URL: https://www.adhdautism.online
-      NEXT_PUBLIC_BASE_PATH: ""
-      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_cG9wdWxhci1mcm9nLTkxLmNsZXJrLmFjY291bnRzLmRldiQ
+    timeout-minutes: 10
     steps:
       - name: Baixar exclusivamente a branch de correção
         uses: actions/checkout@v4
@@ -80,12 +76,6 @@ jobs:
           rm -f assets/home-images.tar.gz assets/storefront-*.b64
           rmdir assets 2>/dev/null || true
           rm -f .github/workflows/materialize-homepage.yml
-
-      - name: Instalar dependências
-        run: npm ci
-
-      - name: Validar build de produção
-        run: npm run build
 
       - name: Registrar somente os arquivos finais
         shell: bash
