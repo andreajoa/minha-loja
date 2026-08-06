@@ -1,3 +1,7 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+
 const instagramImages = [
   {
     src: "/instagram-strip/1.png",
@@ -22,6 +26,10 @@ const instagramImages = [
 ] as const;
 
 export default function InstagramStrip() {
+  const pathname = usePathname();
+
+  if (pathname !== "/") return null;
+
   return (
     <section className="bg-background-alt py-8 sm:py-10">
       <div className="relative overflow-hidden bg-[#d8c9bd]">
