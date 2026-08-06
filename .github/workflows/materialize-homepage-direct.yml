@@ -1,0 +1,104 @@
+name: Materializar homepage na branch de validação
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  materialize-and-validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_PUBLIC_APP_URL: https://www.adhdautism.online
+      NEXT_PUBLIC_BASE_PATH: ""
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_cG9wdWxhci1mcm9nLTkxLmNsZXJrLmFjY291bnRzLmRldiQ
+    steps:
+      - name: Baixar exclusivamente a branch de correção
+        uses: actions/checkout@v4
+        with:
+          ref: fix/homepage-images-direct
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Transformar o pacote em arquivos definitivos
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test -f assets/home-images.tar.gz
+          rm -rf public/home-images
+          mkdir -p public/home-images
+          tar -xzf assets/home-images.tar.gz -C public/home-images
+
+          cat assets/storefront-00.b64 \
+              assets/storefront-01.b64 \
+              assets/storefront-02.b64 \
+              assets/storefront-03.b64 \
+              assets/storefront-04.b64 \
+              assets/storefront-05.b64 \
+              assets/storefront-06.b64 \
+              assets/storefront-07.b64 \
+            | tr -d '\r\n' \
+            | base64 --decode \
+            > src/components/StorefrontHome.tsx
+
+          count="$(find public/home-images -maxdepth 1 -type f -name '*.webp' | wc -l | tr -d ' ')"
+          test "$count" = "19"
+          test -s src/components/StorefrontHome.tsx
+          grep -q 'export default function StorefrontHome' src/components/StorefrontHome.tsx
+
+          required=(
+            atalho-categoria-autonomia.webp
+            atalho-categoria-cognitivo.webp
+            atalho-categoria-comunicacao.webp
+            atalho-categoria-criatividade.webp
+            atalho-categoria-motor.webp
+            atalho-categoria-sensorial.webp
+            card-categoria-autonomia.webp
+            card-categoria-comunicacao.webp
+            card-categoria-motor.webp
+            card-categoria-sensorial.webp
+            colecao-autonomia.webp
+            colecao-comunicacao.webp
+            colecao-motor.webp
+            colecao-sensorial.webp
+            curadoria-com-proposito.webp
+            galeria-familia-comunicacao.webp
+            galeria-familia-exploracao.webp
+            galeria-familia-rotina.webp
+            galeria-familia-sensorial.webp
+          )
+
+          for image in "${required[@]}"; do
+            test -s "public/home-images/$image"
+          done
+
+          rm -f assets/home-images.tar.gz assets/storefront-*.b64
+          rmdir assets 2>/dev/null || true
+          rm -f .github/workflows/materialize-homepage.yml
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Validar build de produção
+        run: npm run build
+
+      - name: Registrar somente os arquivos finais
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "Nenhuma alteração pendente."
+            exit 0
+          fi
+
+          git commit -m "Adiciona imagens editoriais como arquivos definitivos"
+          git push origin HEAD:fix/homepage-images-direct
