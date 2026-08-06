@@ -4,7 +4,7 @@ export function GET() {
   return NextResponse.json({
     status: "ok",
     service: "brinqueteando",
-    basePath: "/brinqueteando",
+    basePath: "",
     integrations: {
       clerk: Boolean(
         process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY,

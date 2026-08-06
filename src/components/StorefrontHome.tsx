@@ -57,7 +57,7 @@ function ProductVisual({
         <img
           src={product.image}
           alt={product.name}
-          className={`h-full w-full object-cover ${animated ? "transition duration-700 hover:scale-105" : ""}`}
+          className={`h-full w-full object-contain p-6 sm:p-8 ${animated ? "transition duration-700 hover:scale-105" : ""}`}
           loading={index > 1 ? "lazy" : "eager"}
         />
       ) : (
@@ -104,14 +104,41 @@ export default function StorefrontHome() {
     );
   }
 
-  const hero = products[0];
-  const featured = products[1] ?? hero;
-  const story = products[2] ?? hero;
-  const campaign = products[3] ?? hero;
+  const hero = products.find((product) => product.id === "14955388567918") ?? products[0];
+  const campaign = products.find((product) => product.id === "14944174637422") ?? products[0];
   const categoryList = categories.filter((category) => category !== "Todos");
-  const featuredProducts = products.slice(0, 6);
-  const mosaicProducts = Array.from({ length: 4 }, (_, index) => products[index % products.length]);
-  const galleryProducts = Array.from({ length: 4 }, (_, index) => products[(index + 1) % products.length]);
+  const featuredIds = [
+    "14955388567918",
+    "14943278334318",
+    "14943419564398",
+    "14944174637422",
+    "14943441977710",
+    "14944017875310",
+  ];
+  const featuredProducts = featuredIds
+    .map((id) => products.find((product) => product.id === id))
+    .filter((product): product is Product => Boolean(product));
+
+  const categoryNavigation = [
+    { label: "Sensorial", category: "Sensorial", image: "/home-images/categoria-sensorial.png" },
+    { label: "Comunicação", category: "Comunicação", image: "/home-images/categoria-comunicacao.png" },
+    { label: "Motor", category: "Motor", image: "/home-images/categoria-motor.png" },
+    { label: "Autonomia", category: "Autonomia", image: "/home-images/categoria-rotina.png" },
+  ] as const;
+
+  const collectionCards = [
+    { title: "Exploração sensorial", category: "Sensorial", image: "/home-images/categoria-sensorial.png" },
+    { title: "Linguagem e comunicação", category: "Comunicação", image: "/home-images/categoria-comunicacao.png" },
+    { title: "Coordenação e movimento", category: "Motor", image: "/home-images/categoria-motor.png" },
+    { title: "Rotina e autonomia", category: "Autonomia", image: "/home-images/categoria-rotina.png" },
+  ] as const;
+
+  const socialGallery = [
+    "/home-images/galeria-nova-sensorial.png",
+    "/home-images/galeria-nova-rotina.png",
+    "/home-images/galeria-nova-motor.png",
+    "/home-images/galeria-nova-comunicacao.png",
+  ] as const;
 
   return (
     <div className="overflow-hidden bg-background">
@@ -200,7 +227,7 @@ export default function StorefrontHome() {
         </div>
       </section>
 
-      <section id="como-escolher" className="reveal-section mx-auto max-w-7xl px-5 py-20 sm:py-28">
+      <section id="como-escolher" className="mx-auto max-w-7xl px-5 py-20 sm:py-28">
         <SectionHeading
           eyebrow="Ensinar antes de vender"
           title="A melhor escolha começa observando a criança."
@@ -227,7 +254,7 @@ export default function StorefrontHome() {
         </div>
       </section>
 
-      <section className="reveal-section border-y border-border/45 bg-background-alt py-18 sm:py-22">
+      <section className="border-y border-border/45 bg-background-alt py-18 sm:py-22">
         <div className="mx-auto max-w-7xl px-5 text-center">
           <SectionHeading
             eyebrow="Navegação simples"
@@ -236,32 +263,25 @@ export default function StorefrontHome() {
             centered
           />
 
-          <div className="mt-12 flex snap-x gap-5 overflow-x-auto pb-5 sm:grid sm:grid-cols-3 sm:overflow-visible lg:grid-cols-6">
-            {categoryList.slice(0, 6).map((category, index) => {
-              const representative = products.find((product) => product.category === category) ?? hero;
-              return (
-                <Link
-                  key={category}
-                  href={`/colecoes?categoria=${encodeURIComponent(category)}`}
-                  className="category-play group min-w-36 snap-start text-center"
-                >
-                  <div className="storybook-shadow relative mx-auto flex aspect-square w-32 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-background transition duration-300 group-hover:-translate-y-2 group-hover:border-secondary-light/50">
-                    <div className="absolute inset-2 rounded-full border border-secondary/15" />
-                    {representative.image ? (
-                      <img src={representative.image} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-110" />
-                    ) : (
-                      <span className="category-emoji relative text-5xl" aria-hidden="true">{categoryIcons[category] ?? representative.emoji}</span>
-                    )}
-                  </div>
-                  <p className="mt-4 text-xs font-black uppercase tracking-[0.14em] text-primary transition group-hover:text-secondary">{category}</p>
-                </Link>
-              );
-            })}
+          <div className="mx-auto mt-12 grid max-w-4xl grid-cols-2 gap-7 md:grid-cols-4">
+            {categoryNavigation.map((item) => (
+              <Link
+                key={item.label}
+                href={`/colecoes?categoria=${encodeURIComponent(item.category)}`}
+                className="category-play group text-center"
+              >
+                <div className="storybook-shadow relative mx-auto flex aspect-square w-32 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-background transition duration-300 group-hover:-translate-y-2 group-hover:border-secondary-light/50">
+                  <div className="absolute inset-2 z-10 rounded-full border border-secondary/15" />
+                  <img src={item.image} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-110" />
+                </div>
+                <p className="mt-4 text-xs font-black uppercase tracking-[0.14em] text-primary transition group-hover:text-secondary">{item.label}</p>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="reveal-section mx-auto max-w-7xl px-5 py-20 sm:py-28">
+      <section className="mx-auto max-w-7xl px-5 py-20 sm:py-28">
         <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
           <SectionHeading
             eyebrow="Seleção em destaque"
@@ -276,7 +296,7 @@ export default function StorefrontHome() {
         </div>
       </section>
 
-      <section className="reveal-section relative overflow-hidden bg-primary text-white">
+      <section className="relative overflow-hidden bg-primary text-white">
         <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full border border-secondary-light/20" />
         <div className="absolute -bottom-32 right-12 h-80 w-80 rounded-full bg-secondary/18 blur-2xl" />
         <div className="absolute right-[10%] top-12 animate-float text-5xl text-secondary-light/50" aria-hidden="true">✦</div>
@@ -306,12 +326,14 @@ export default function StorefrontHome() {
         </div>
       </section>
 
-      <section className="reveal-section mx-auto max-w-7xl px-5 py-20 sm:py-28">
+      <section className="mx-auto max-w-7xl px-5 py-20 sm:py-28">
         <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
-          <div className="relative min-h-[570px]">
-            <ProductVisual product={featured} index={1} className="absolute inset-y-0 left-0 w-[72%] rounded-[2rem] storybook-shadow" emojiClassName="text-[15rem]" animated />
-            <ProductVisual product={story} index={2} className="absolute bottom-5 right-0 h-[48%] w-[48%] rounded-[1.6rem] border-8 border-background storybook-shadow" emojiClassName="text-8xl" animated />
-            <div className="toy-chip absolute right-5 top-7 h-16 w-16 animate-float text-3xl" aria-hidden="true">🌈</div>
+          <div className="relative min-h-[570px] overflow-hidden rounded-[2rem] storybook-shadow">
+            <img
+              src="/home-images/curadoria-com-proposito.png"
+              alt="Adulto e criança explorando uma atividade de brincar com mediação"
+              className="absolute inset-0 h-full w-full object-cover"
+            />
           </div>
 
           <div className="lg:pl-8">
@@ -332,7 +354,7 @@ export default function StorefrontHome() {
         </div>
       </section>
 
-      <section className="reveal-section bg-background-alt py-20 sm:py-28">
+      <section className="bg-background-alt py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-5">
           <SectionHeading
             eyebrow="Produto em destaque"
@@ -363,7 +385,7 @@ export default function StorefrontHome() {
         </div>
       </section>
 
-      <section className="reveal-section mx-auto max-w-7xl px-5 py-20 sm:py-28">
+      <section className="mx-auto max-w-7xl px-5 py-20 sm:py-28">
         <SectionHeading
           eyebrow="Coleções"
           title="Um universo de possibilidades para cada momento"
@@ -372,20 +394,20 @@ export default function StorefrontHome() {
         />
 
         <div className="mt-12 grid min-h-[660px] gap-4 lg:grid-cols-12 lg:grid-rows-2">
-          {mosaicProducts.map((product, index) => {
+          {collectionCards.map((item, index) => {
             const spans = ["lg:col-span-5 lg:row-span-2", "lg:col-span-7", "lg:col-span-4", "lg:col-span-3"];
             return (
               <Link
-                key={`${product.id}-${index}`}
-                href={`/produto/${product.id}`}
+                key={item.category}
+                href={`/colecoes?categoria=${encodeURIComponent(item.category)}`}
                 className={`group relative min-h-72 overflow-hidden rounded-[1.7rem] ${spans[index]}`}
               >
-                <ProductVisual product={product} index={index + 1} className="absolute inset-0 transition duration-700 group-hover:scale-105" animated />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary/82 via-primary/8 to-transparent" />
+                <img src={item.image} alt="" className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/82 via-primary/10 to-transparent" />
                 <div className="absolute bottom-0 left-0 p-7 text-white">
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-secondary-light">{product.category}</p>
-                  <h3 className="mt-2 max-w-md font-display text-4xl leading-none">{product.name}</h3>
-                  <p className="mt-3 text-sm font-bold text-white/75">{formatPrice(product.price)}</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-secondary-light">{item.category}</p>
+                  <h3 className="mt-2 max-w-md font-display text-4xl leading-none">{item.title}</h3>
+                  <p className="mt-3 text-sm font-bold text-white/75">Ver coleção →</p>
                 </div>
               </Link>
             );
@@ -393,7 +415,7 @@ export default function StorefrontHome() {
         </div>
       </section>
 
-      <section className="reveal-section border-y border-border/45 bg-primary py-20 text-white sm:py-24">
+      <section className="border-y border-border/45 bg-primary py-20 text-white sm:py-24">
         <div className="mx-auto max-w-6xl px-5 text-center">
           <span className="inline-block animate-sparkle font-display text-6xl text-secondary-light" aria-hidden="true">“</span>
           <blockquote className="mx-auto mt-3 max-w-4xl font-display text-4xl italic leading-tight sm:text-5xl">
@@ -403,7 +425,7 @@ export default function StorefrontHome() {
         </div>
       </section>
 
-      <section className="reveal-section mx-auto max-w-7xl px-5 py-20 sm:py-28">
+      <section className="mx-auto max-w-7xl px-5 py-20 sm:py-28">
         <div className="grid gap-10 lg:grid-cols-[0.75fr_1fr]">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.22em] text-secondary">Precisa de ajuda?</p>
@@ -431,11 +453,13 @@ export default function StorefrontHome() {
         </div>
       </section>
 
-      <section className="reveal-section bg-background-alt py-20 sm:py-24">
+      <section className="bg-background-alt py-20 sm:py-24">
         <div className="mx-auto max-w-7xl px-5">
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            {galleryProducts.map((product, index) => (
-              <ProductVisual key={`${product.id}-social-${index}`} product={product} index={index} className="aspect-square rounded-[1.5rem] transition duration-500 hover:-translate-y-2" animated />
+            {socialGallery.map((image, index) => (
+              <div key={image} className="aspect-square overflow-hidden rounded-[1.5rem] bg-white shadow-sm transition duration-500 hover:-translate-y-2">
+                <img src={image} alt={`Família brincando com recurso educativo ${index + 1}`} className="h-full w-full object-cover" loading="lazy" />
+              </div>
             ))}
           </div>
           <div className="mt-7 text-center">

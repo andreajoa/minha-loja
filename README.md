@@ -5,7 +5,7 @@ Loja de brinquedos sensoriais e pedagógicos construída com Next.js 16, Clerk, 
 A aplicação foi configurada para funcionar no subcaminho:
 
 ```text
-https://www.adhdautism.online/brinqueteando
+https://www.adhdautism.online
 ```
 
 ## Executar localmente
@@ -19,7 +19,7 @@ npm run dev
 Acesse:
 
 ```text
-http://localhost:3000/brinqueteando
+http://localhost:3000
 ```
 
 Use as chaves de **teste** do Clerk e da Stripe no ambiente local. As chaves `live` devem existir somente no ambiente de produção.
@@ -40,7 +40,7 @@ Integrações configuradas:
 Cadastre o webhook de produção apontando para:
 
 ```text
-https://www.adhdautism.online/brinqueteando/api/webhook
+https://www.adhdautism.online/api/webhook
 ```
 
 Evento necessário:
@@ -68,7 +68,7 @@ Crie ou confirme o bucket indicado em `R2_BUCKET_NAME` e conecte um domínio pú
 O endpoint administrativo de upload é:
 
 ```text
-POST /brinqueteando/api/admin/upload
+POST /api/admin/upload
 ```
 
 Ele exige login no Clerk e permite acesso somente aos IDs listados em `ADMIN_CLERK_USER_IDS`.
@@ -83,11 +83,11 @@ Campos `multipart/form-data`:
 Depois do deploy, consulte:
 
 ```text
-https://www.adhdautism.online/brinqueteando/api/health
+https://www.adhdautism.online/api/health
 ```
 
 A resposta informa quais integrações receberam variáveis de ambiente, sem revelar nenhum segredo.
 
 ## Publicação no subcaminho
 
-O `basePath` já está definido como `/brinqueteando`. Caso `adhdautism.online` pertença a outro projeto, esse projeto principal precisa encaminhar `/brinqueteando/:path*` para a implantação desta loja. Um domínio não pode ser dividido entre dois projetos somente pela configuração de DNS.
+O `basePath` já está definido como ``. Caso `adhdautism.online` pertença a outro projeto, esse projeto principal precisa encaminhar `/:path*` para a implantação desta loja. Um domínio não pode ser dividido entre dois projetos somente pela configuração de DNS.

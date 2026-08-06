@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
-const basePath = "/brinqueteando";
+const basePath = "";
 
 const slides = [
   {

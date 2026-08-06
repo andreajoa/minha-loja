@@ -52,7 +52,7 @@ export default async function ProductPage({
               <div className="absolute right-8 top-8 animate-float text-4xl text-secondary-light" aria-hidden="true">✦</div>
               <div className="absolute bottom-10 left-8 animate-float-slow text-4xl" aria-hidden="true">♡</div>
               {product.image ? (
-                <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
+                <img src={product.image} alt={product.name} className="h-full w-full object-contain p-6 sm:p-10" />
               ) : (
                 <span className="animate-sway text-[10rem] drop-shadow-[0_24px_30px_rgba(9,38,71,0.16)] sm:text-[14rem]" aria-hidden="true">{product.emoji}</span>
               )}

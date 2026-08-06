@@ -14,12 +14,12 @@ export const metadata: Metadata = {
   },
   description:
     "Brinquedos sensoriais e pedagógicos para crianças com autismo e TDAH, com curadoria de Margareth Almeida, Neuropsicopedagoga.",
-  alternates: { canonical: "/brinqueteando" },
+  alternates: { canonical: "" },
   openGraph: {
     title: "BrinqueTEAndo",
     description:
       "Recursos escolhidos para apoiar o brincar, a comunicação e o desenvolvimento infantil.",
-    url: "/brinqueteando",
+    url: "",
     siteName: "BrinqueTEAndo",
     locale: "pt_BR",
     type: "website",

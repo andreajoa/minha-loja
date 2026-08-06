@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import { useCart } from "@/components/CartProvider";
 import { formatPrice, products, type Product } from "@/data/products";
 
-const basePath = "/brinqueteando";
+const basePath = "";
 
 function ProductArtwork({ product, className = "" }: { product: Product; className?: string }) {
   if (product.image) {
@@ -48,9 +48,12 @@ function QuoteBrushSection() {
 function FeaturedPurchaseSection() {
   const router = useRouter();
   const { addItem } = useCart();
-  const featured = products.find((product) => product.category === "Comunicação") ?? products[0];
-  const gallery = useMemo(() => [featured, ...products.filter((product) => product.id !== featured.id).slice(0, 2)], [featured]);
-  const [preview, setPreview] = useState(featured);
+  const featured = products.find((product) => product.id === "14943278334318") ?? products[0];
+  const productImages = useMemo(
+    () => (featured.gallery?.length ? featured.gallery.slice(0, 4) : [featured.image]),
+    [featured],
+  );
+  const [previewImage, setPreviewImage] = useState(productImages[0] || featured.image);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
 
@@ -66,23 +69,23 @@ function FeaturedPurchaseSection() {
       <div className="mx-auto grid max-w-[1440px] overflow-hidden rounded-[2rem] border border-border/45 bg-white shadow-[0_30px_90px_rgba(9,38,71,0.10)] lg:grid-cols-[1.08fr_0.92fr]">
         <div className="relative min-h-[520px] border-b border-border/35 bg-[#eee6df] p-4 sm:p-6 lg:border-b-0 lg:border-r">
           <div className="absolute bottom-7 right-6 top-7 z-10 flex w-20 flex-col gap-3 sm:w-24">
-            {gallery.map((item) => (
+            {productImages.map((image, index) => (
               <button
-                key={item.id}
+                key={`${image}-${index}`}
                 type="button"
-                onClick={() => setPreview(item)}
+                onClick={() => setPreviewImage(image)}
                 className={`aspect-square overflow-hidden rounded-xl border-2 bg-white p-1.5 shadow-md transition hover:-translate-y-0.5 ${
-                  preview.id === item.id ? "border-secondary" : "border-white"
+                  previewImage === image ? "border-secondary" : "border-white"
                 }`}
-                aria-label={`Visualizar ${item.name}`}
+                aria-label={`Visualizar imagem ${index + 1} de ${featured.name}`}
               >
-                <ProductArtwork product={item} />
+                <img src={image} alt="" className="h-full w-full object-contain" />
               </button>
             ))}
           </div>
 
           <div className="absolute inset-4 right-28 overflow-hidden rounded-[1.5rem] bg-[radial-gradient(circle_at_50%_38%,rgba(255,255,255,0.88),transparent_44%),linear-gradient(145deg,#e8ddd4,#f8f4f0_58%,#e5d6cb)] sm:inset-6 sm:right-36">
-            <ProductArtwork product={preview} className="p-10 sm:p-16" />
+            <img src={previewImage} alt={featured.name} className="h-full w-full object-contain p-8 sm:p-12" />
           </div>
         </div>
 
@@ -143,10 +146,10 @@ function FeaturedPurchaseSection() {
 
 function CategoryFramesSection() {
   const definitions = [
-    ["Sensorial", products.find((product) => product.category === "Sensorial")],
-    ["Comunicação", products.find((product) => product.category === "Comunicação")],
-    ["Motor", products.find((product) => product.category === "Motor")],
-    ["Rotina", products.find((product) => product.id === "prod_005")],
+    { label: "Sensorial", category: "Sensorial", image: "/home-images/categoria-sensorial.png" },
+    { label: "Comunicação", category: "Comunicação", image: "/home-images/categoria-comunicacao.png" },
+    { label: "Motor", category: "Motor", image: "/home-images/categoria-motor.png" },
+    { label: "Autonomia", category: "Autonomia", image: "/home-images/categoria-rotina.png" },
   ] as const;
 
   return (
@@ -157,22 +160,18 @@ function CategoryFramesSection() {
           <h2 className="mt-3 font-display text-4xl text-primary sm:text-5xl">Explore as categorias</h2>
         </div>
 
-        <div className="mt-14 grid gap-x-5 gap-y-16 sm:grid-cols-2 lg:grid-cols-4">
-          {definitions.map(([label, product], index) => {
-            const item = product ?? products[index % products.length];
-            const category = label === "Rotina" ? "Comunicação" : label;
-            return (
-              <Link key={label} href={`/colecoes?categoria=${encodeURIComponent(category)}`} className="group relative block pt-20">
-                <div className="relative min-h-[250px] overflow-visible rounded-2xl bg-[#3a2a22] px-5 pb-8 pt-32 text-center shadow-[0_24px_55px_rgba(9,38,71,0.12)] transition duration-300 group-hover:-translate-y-2 group-hover:bg-secondary">
-                  <div className="absolute -top-24 left-1/2 h-56 w-[88%] -translate-x-1/2 transition duration-500 group-hover:-translate-y-3 group-hover:scale-105">
-                    <ProductArtwork product={item} />
-                  </div>
-                  <h3 className="font-display text-4xl text-white">{label}</h3>
-                  <p className="mt-3 text-xs font-bold uppercase tracking-[0.15em] text-white/65">Ver produtos</p>
+        <div className="mx-auto mt-14 grid max-w-6xl gap-x-5 gap-y-16 sm:grid-cols-2 lg:grid-cols-4">
+          {definitions.map((item) => (
+            <Link key={item.label} href={`/colecoes?categoria=${encodeURIComponent(item.category)}`} className="group relative block pt-20">
+              <div className="relative min-h-[250px] overflow-visible rounded-2xl bg-[#3a2a22] px-5 pb-8 pt-32 text-center shadow-[0_24px_55px_rgba(9,38,71,0.12)] transition duration-300 group-hover:-translate-y-2 group-hover:bg-secondary">
+                <div className="absolute -top-24 left-1/2 h-56 w-[88%] -translate-x-1/2 overflow-hidden rounded-[1.7rem] border-8 border-background bg-white shadow-xl transition duration-500 group-hover:-translate-y-3 group-hover:scale-105">
+                  <img src={item.image} alt="" className="h-full w-full object-cover" />
                 </div>
-              </Link>
-            );
-          })}
+                <h3 className="font-display text-4xl text-white">{item.label}</h3>
+                <p className="mt-3 text-xs font-bold uppercase tracking-[0.15em] text-white/65">Ver produtos</p>
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
     </section>

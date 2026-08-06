@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  basePath: "/brinqueteando",
+  basePath: "",
   poweredByHeader: false,
   reactStrictMode: true,
   async headers() {

@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - main
-      - agent/brinqueteando-production
+      - agent-production
 
 permissions:
   contents: read
@@ -15,8 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      NEXT_PUBLIC_APP_URL: https://www.adhdautism.online/brinqueteando
-      NEXT_PUBLIC_BASE_PATH: /brinqueteando
+      NEXT_PUBLIC_APP_URL: https://www.adhdautism.online
+      NEXT_PUBLIC_BASE_PATH: 
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_cG9wdWxhci1mcm9nLTkxLmNsZXJrLmFjY291bnRzLmRldiQ
     steps:
       - name: Checkout
