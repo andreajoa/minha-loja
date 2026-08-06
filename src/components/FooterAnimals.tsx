@@ -19,10 +19,10 @@ export default function FooterAnimals() {
 
   return (
     <section className="bg-background" aria-label="Rodapé de pagamentos">
-      <div className="relative overflow-hidden border-b border-border/70 bg-background">
+      <div className="relative overflow-hidden bg-background">
         <div className="mx-auto max-w-7xl px-5">
           <div className="relative h-[88px] sm:h-[104px] lg:h-[118px]">
-            <div className="absolute inset-x-0 bottom-0 h-px bg-primary/55" aria-hidden="true" />
+            <div className="absolute inset-x-0 bottom-0 h-px bg-primary/60" aria-hidden="true" />
             <img
               src="/home-images/footer-animals.webp"
               alt=""
@@ -38,12 +38,12 @@ export default function FooterAnimals() {
       </div>
 
       <div className="border-b border-border/55 bg-white/45">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mx-auto flex max-w-7xl flex-col gap-5 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-muted">
-              Pagamento seguro
+            <p className="text-xs text-muted">
+              © {new Date().getFullYear()} BrinqueTEAndo. Todos os direitos reservados.
             </p>
-            <div className="mt-2 flex flex-wrap items-center gap-2" aria-label="Bandeiras de cartão">
+            <div className="mt-2.5 flex flex-wrap items-center gap-2" aria-label="Bandeiras de cartão">
               {cardBrands.map((brand) => (
                 <span
                   key={brand.name}
@@ -55,11 +55,14 @@ export default function FooterAnimals() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 text-xs text-muted sm:text-right">
-            <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 text-secondary" aria-hidden="true">
-              <path fill="currentColor" d="M12 2a7 7 0 0 0-7 7v3H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-1V9a7 7 0 0 0-7-7Zm-5 7a5 5 0 1 1 10 0v3H7V9Zm5 6a2 2 0 0 1 1 3.73V20h-2v-1.27A2 2 0 0 1 12 15Z" />
-            </svg>
-            <span>Checkout protegido e processado pela Stripe.</span>
+          <div className="text-xs text-muted sm:max-w-md sm:text-right">
+            <p>Brinquedos e recursos pedagógicos com informação responsável.</p>
+            <div className="mt-2 flex items-center gap-2 sm:justify-end">
+              <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 text-secondary" aria-hidden="true">
+                <path fill="currentColor" d="M12 2a7 7 0 0 0-7 7v3H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-1V9a7 7 0 0 0-7-7Zm-5 7a5 5 0 1 1 10 0v3H7V9Zm5 6a2 2 0 0 1 1 3.73V20h-2v-1.27A2 2 0 0 1 12 15Z" />
+              </svg>
+              <span>Checkout protegido e processado pela Stripe.</span>
+            </div>
           </div>
         </div>
       </div>
