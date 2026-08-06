@@ -1,0 +1,1 @@
+Este arquivo dispara a restauração validada das 101 imagens dos produtos em alta resolução. Ele será removido automaticamente junto com os arquivos temporários antes da integração.
