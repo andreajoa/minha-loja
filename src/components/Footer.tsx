@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { categories } from "@/data/products";
+import FooterAnimals from "@/components/FooterAnimals";
 
 export default function Footer() {
   const menuCategories = categories.filter((category) => category !== "Todos").slice(0, 6);
 
   return (
     <footer className="bg-background text-primary">
+      <FooterAnimals />
+
       <section className="relative overflow-hidden bg-secondary px-5 py-16 text-center text-white sm:py-20">
         <div className="absolute -left-16 -top-16 h-52 w-52 rounded-full border border-white/15" />
         <div className="absolute -bottom-24 right-12 h-64 w-64 rounded-full bg-primary/12" />
