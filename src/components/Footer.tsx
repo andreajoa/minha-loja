@@ -7,8 +7,6 @@ export default function Footer() {
 
   return (
     <footer className="bg-background text-primary">
-      <FooterAnimals />
-
       <section className="relative overflow-hidden bg-secondary px-5 py-16 text-center text-white sm:py-20">
         <div className="absolute -left-16 -top-16 h-52 w-52 rounded-full border border-white/15" />
         <div className="absolute -bottom-24 right-12 h-64 w-64 rounded-full bg-primary/12" />
@@ -80,12 +78,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-border/55 px-5 py-5">
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 text-xs text-muted sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} BrinqueTEAndo. Todos os direitos reservados.</p>
-          <p>Brinquedos e recursos pedagógicos com informação responsável.</p>
-        </div>
-      </div>
+      <FooterAnimals />
     </footer>
   );
 }
