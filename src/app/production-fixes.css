@@ -11,3 +11,46 @@
   background: #fdf9f6;
   padding: clamp(1rem, 2.5vw, 2.25rem);
 }
+
+/*
+ * Cards "Explore as categorias".
+ * A arte original com as quatro categorias já existe no projeto em
+ * /home-sections/04-categorias-frame.png. Cada card exibe apenas o seu
+ * quadrante, evitando caminhos para imagens inexistentes.
+ */
+:is(
+  div:has(> img[src="/home-images/categoria-sensorial.webp"]),
+  div:has(> img[src="/home-images/categoria-comunicacao.webp"]),
+  div:has(> img[src="/home-images/categoria-motor.webp"]),
+  div:has(> img[src="/home-images/categoria-rotina.webp"])
+) {
+  background-color: #fdf9f6 !important;
+  background-image: url("/home-sections/04-categorias-frame.png") !important;
+  background-repeat: no-repeat !important;
+  background-size: 400% auto !important;
+}
+
+div:has(> img[src="/home-images/categoria-sensorial.webp"]) {
+  background-position: 0% 0% !important;
+}
+
+div:has(> img[src="/home-images/categoria-comunicacao.webp"]) {
+  background-position: 33.333% 0% !important;
+}
+
+div:has(> img[src="/home-images/categoria-motor.webp"]) {
+  background-position: 66.667% 0% !important;
+}
+
+div:has(> img[src="/home-images/categoria-rotina.webp"]) {
+  background-position: 100% 0% !important;
+}
+
+:is(
+  div:has(> img[src="/home-images/categoria-sensorial.webp"]),
+  div:has(> img[src="/home-images/categoria-comunicacao.webp"]),
+  div:has(> img[src="/home-images/categoria-motor.webp"]),
+  div:has(> img[src="/home-images/categoria-rotina.webp"])
+) > img {
+  display: none !important;
+}
