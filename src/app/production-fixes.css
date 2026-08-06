@@ -104,3 +104,59 @@ a.min-w-36[href*="categoria=Motor"] > div.aspect-square {
 a.min-w-36[href*="categoria=Criatividade"] > div.aspect-square {
   background-image: url("/category-hover/criatividade.webp") !important;
 }
+
+/*
+ * Seção "Conteúdo que orienta antes de vender".
+ * O componente ainda referencia SVGs antigos; os cards abaixo usam os
+ * quatro banners reais já existentes no repositório.
+ */
+:is(
+  a:has(> img[src="/homepage-banners/banner-1.svg"]),
+  a:has(> img[src="/homepage-banners/banner-2.svg"]),
+  a:has(> img[src="/homepage-banners/banner-3.svg"]),
+  a:has(> img[src="/homepage-banners/banner-4.svg"])
+) {
+  background-color: #fdf9f6 !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: 100% 100% !important;
+  transition:
+    transform 300ms ease,
+    box-shadow 300ms ease,
+    background-size 500ms ease !important;
+}
+
+:is(
+  a:has(> img[src="/homepage-banners/banner-1.svg"]),
+  a:has(> img[src="/homepage-banners/banner-2.svg"]),
+  a:has(> img[src="/homepage-banners/banner-3.svg"]),
+  a:has(> img[src="/homepage-banners/banner-4.svg"])
+):hover {
+  background-size: 103% 103% !important;
+  box-shadow: 0 28px 70px rgba(9, 38, 71, 0.14) !important;
+}
+
+a:has(> img[src="/homepage-banners/banner-1.svg"]) {
+  background-image: url("/banners/banner-01-brincar-com-proposito.png") !important;
+}
+
+a:has(> img[src="/homepage-banners/banner-2.svg"]) {
+  background-image: url("/banners/banner-03-menos-excesso-mais-intencao.png") !important;
+}
+
+a:has(> img[src="/homepage-banners/banner-3.svg"]) {
+  background-image: url("/banners/banner-02-escolher-com-clareza.png") !important;
+}
+
+a:has(> img[src="/homepage-banners/banner-4.svg"]) {
+  background-image: url("/banners/banner-04-mediacao-transforma.png") !important;
+}
+
+:is(
+  a:has(> img[src="/homepage-banners/banner-1.svg"]),
+  a:has(> img[src="/homepage-banners/banner-2.svg"]),
+  a:has(> img[src="/homepage-banners/banner-3.svg"]),
+  a:has(> img[src="/homepage-banners/banner-4.svg"])
+) > img {
+  opacity: 0 !important;
+}
