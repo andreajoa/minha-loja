@@ -54,3 +54,53 @@ div:has(> img[src="/home-images/categoria-rotina.webp"]) {
 ) > img {
   display: none !important;
 }
+
+/*
+ * Atalhos circulares "Escolha pelo objetivo do brincar".
+ * Cada categoria recebe uma arte gerada diferente, sem repetição.
+ */
+a.min-w-36 > div.aspect-square {
+  overflow: hidden;
+  background-color: #fdf9f6 !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+  transition: transform 300ms ease, border-color 300ms ease, background-size 500ms ease !important;
+}
+
+a.min-w-36:hover > div.aspect-square {
+  background-size: 108% !important;
+}
+
+a.min-w-36 > div.aspect-square > span {
+  display: none !important;
+}
+
+a.min-w-36[href*="categoria=Sensorial"] > div.aspect-square {
+  background-image: url("/home-sections/04-categorias-frame.png") !important;
+  background-position: left center !important;
+}
+
+a.min-w-36[href*="categoria=Comunica"] > div.aspect-square {
+  background-image: url("/banners/banner-04-mediacao-transforma.png") !important;
+  background-position: 82% center !important;
+}
+
+a.min-w-36[href*="categoria=Cognitivo"] > div.aspect-square {
+  background-image: url("/banners/banner-02-escolher-com-clareza.png") !important;
+  background-position: 82% center !important;
+}
+
+a.min-w-36[href*="categoria=Autonomia"] > div.aspect-square {
+  background-image: url("/home-sections/01-intencionalidade-no-brincar.png") !important;
+  background-position: 82% center !important;
+}
+
+a.min-w-36[href*="categoria=Motor"] > div.aspect-square {
+  background-image: url("/banners/banner-03-menos-excesso-mais-intencao.png") !important;
+  background-position: 82% center !important;
+}
+
+a.min-w-36[href*="categoria=Criatividade"] > div.aspect-square {
+  background-image: url("/banners/banner-01-brincar-com-proposito.png") !important;
+  background-position: 82% center !important;
+}
