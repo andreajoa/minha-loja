@@ -3,11 +3,11 @@ import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import "./commerce.css";
 import "./production-fixes.css";
-import "./instagram-strip.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CookieBar from "@/components/CookieBar";
 import CartProvider from "@/components/CartProvider";
+import InstagramStrip from "@/components/InstagramStrip";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.adhdautism.online"),
@@ -44,6 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <CartProvider>
             <Header />
             <main className="flex-1">{children}</main>
+            <InstagramStrip />
             <Footer />
             <CookieBar />
           </CartProvider>
