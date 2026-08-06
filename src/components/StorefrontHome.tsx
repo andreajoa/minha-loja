@@ -14,14 +14,13 @@ const steps = [
   ["03", "Participe da brincadeira", "Apresente um recurso por vez, nomeie ações, espere turnos e acompanhe a resposta da criança."],
 ] as const;
 
-const categoryIcons: Record<string, string> = {
-  Sensorial: "🖐️",
-  Comunicação: "💬",
-  Cognitivo: "🧠",
-  Autonomia: "🌱",
-  Motor: "🧩",
-  Criatividade: "🎨",
-  Aquático: "💧",
+const categoryImages: Record<string, string> = {
+  Sensorial: "/category-hover/sensorial.webp",
+  Comunicação: "/category-hover/comunicacao.webp",
+  Cognitivo: "/category-hover/cognitivo.webp",
+  Autonomia: "/category-hover/autonomia.webp",
+  Motor: "/category-hover/motor.webp",
+  Criatividade: "/category-hover/criatividade.webp",
 };
 
 const editorialBanners = [
@@ -94,17 +93,31 @@ export default function StorefrontHome() {
 
       <section className="border-y border-border/45 bg-background-alt py-18 sm:py-22">
         <div className="mx-auto max-w-7xl px-5 text-center">
-          <SectionHeading eyebrow="Navegação simples" title="Escolha pelo objetivo do brincar" text="Acesse as categorias sem depender de fotografias promocionais." centered />
+          <SectionHeading eyebrow="Navegação simples" title="Escolha pelo objetivo do brincar" text="Encontre recursos de acordo com a experiência que você deseja apoiar." centered />
           <div className="mt-12 flex snap-x gap-5 overflow-x-auto pb-5 sm:grid sm:grid-cols-3 sm:overflow-visible lg:grid-cols-6">
-            {categoryList.slice(0, 6).map((category) => (
-              <Link key={category} href={`/colecoes?categoria=${encodeURIComponent(category)}`} className="group min-w-36 snap-start text-center">
-                <div className="relative mx-auto flex aspect-square w-32 items-center justify-center rounded-full border-4 border-white bg-background shadow-[0_18px_45px_rgba(9,38,71,0.10)] transition duration-300 group-hover:-translate-y-2 group-hover:border-secondary-light/50">
-                  <div className="absolute inset-2 rounded-full border border-secondary/15" />
-                  <span className="relative text-5xl" aria-hidden="true">{categoryIcons[category] ?? "✦"}</span>
-                </div>
-                <p className="mt-4 text-xs font-black uppercase tracking-[0.14em] text-primary transition group-hover:text-secondary">{category}</p>
-              </Link>
-            ))}
+            {categoryList.slice(0, 6).map((category) => {
+              const image = categoryImages[category];
+
+              return (
+                <Link key={category} href={`/colecoes?categoria=${encodeURIComponent(category)}`} className="group min-w-36 snap-start text-center">
+                  <div className="relative mx-auto aspect-square w-32 overflow-hidden rounded-full border-4 border-white bg-background shadow-[0_18px_45px_rgba(9,38,71,0.10)] transition duration-300 group-hover:-translate-y-2 group-hover:border-secondary-light/60 group-hover:shadow-[0_24px_60px_rgba(9,38,71,0.18)]">
+                    {image ? (
+                      <img
+                        src={image}
+                        alt={`Categoria ${category}`}
+                        width="512"
+                        height="512"
+                        loading="lazy"
+                        decoding="async"
+                        className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
+                      />
+                    ) : null}
+                    <div className="pointer-events-none absolute inset-2 rounded-full border border-white/65" />
+                  </div>
+                  <p className="mt-4 text-xs font-black uppercase tracking-[0.14em] text-primary transition group-hover:text-secondary">{category}</p>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
