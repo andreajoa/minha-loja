@@ -1,0 +1,89 @@
+name: Finalizar catálogo local
+
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/finalizar-catalogo-local.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  finalizar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check pillow pillow-avif-plugin
+      - name: Salvar imagens geradas da homepage
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin fix/homepage-images-direct:refs/remotes/origin/fix/homepage-images-direct
+          git show origin/fix/homepage-images-direct:assets/home-images.tar.gz > /tmp/home-images.tar.gz
+          rm -rf public/home-images
+          mkdir -p public/home-images
+          tar -xzf /tmp/home-images.tar.gz -C public/home-images
+          cp public/home-images/atalho-categoria-sensorial.webp public/home-images/categoria-sensorial.webp
+          cp public/home-images/atalho-categoria-comunicacao.webp public/home-images/categoria-comunicacao.webp
+          cp public/home-images/atalho-categoria-motor.webp public/home-images/categoria-motor.webp
+          cp public/home-images/atalho-categoria-autonomia.webp public/home-images/categoria-rotina.webp
+          cp public/home-images/galeria-familia-sensorial.webp public/home-images/galeria-nova-sensorial.webp
+          cp public/home-images/galeria-familia-rotina.webp public/home-images/galeria-nova-rotina.webp
+          cp public/home-images/galeria-familia-exploracao.webp public/home-images/galeria-nova-motor.webp
+          cp public/home-images/galeria-familia-comunicacao.webp public/home-images/galeria-nova-comunicacao.webp
+          test -s public/home-images/curadoria-com-proposito.webp
+      - name: Salvar fotografias dos produtos no projeto
+        shell: bash
+        env:
+          MANIFEST_GZ_B64: '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'
+        run: |
+          set -euo pipefail
+          python <<'PYCODE'
+          from io import BytesIO
+          from pathlib import Path
+          import base64, gzip, os, shutil, time, urllib.request
+          import pillow_avif
+          from PIL import Image, ImageOps
+          rows = gzip.decompress(base64.b64decode(os.environ['MANIFEST_GZ_B64'])).decode().splitlines()
+          entries = [line.split('\t', 2) for line in rows if line.strip()]
+          root = Path('public/products/shopify')
+          shutil.rmtree(root, ignore_errors=True)
+          root.mkdir(parents=True, exist_ok=True)
+          opener = urllib.request.build_opener()
+          opener.addheaders = [('User-Agent', 'Mozilla/5.0 BrinqueTEAndo catalog importer')]
+          for position, (product_id, index, url) in enumerate(entries, 1):
+              destination = root / product_id / f'{int(index):02d}.webp'
+              destination.parent.mkdir(parents=True, exist_ok=True)
+              for attempt in range(4):
+                  try:
+                      with opener.open(url, timeout=45) as response:
+                          data = response.read()
+                      image = Image.open(BytesIO(data))
+                      image = ImageOps.exif_transpose(image).convert('RGB')
+                      image.save(destination, 'WEBP', quality=86, method=6)
+                      print(f'[{position}/{len(entries)}] {destination}')
+                      break
+                  except Exception:
+                      if attempt == 3: raise
+                      time.sleep(2 * (attempt + 1))
+          files = list(root.rglob('*.webp'))
+          if len(files) != 101:
+              raise RuntimeError(f'Esperadas 101 imagens; encontradas {len(files)}')
+          PYCODE
+      - name: Registrar arquivos definitivos
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/finalizar-catalogo-local.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Conclui homepage interna e catálogo independente"
+          git push origin HEAD:main
