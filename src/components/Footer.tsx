@@ -10,13 +10,13 @@ export default function Footer() {
 
   return (
     <footer className="bg-background text-primary">
-      <section className="relative overflow-hidden bg-secondary px-5 py-16 text-center text-white sm:py-20">
+      <section className="relative overflow-hidden bg-secondary px-4 py-12 text-center text-white sm:px-5 sm:py-20">
         <div className="absolute -left-16 -top-16 h-52 w-52 rounded-full border border-white/15" />
         <div className="absolute -bottom-24 right-12 h-64 w-64 rounded-full bg-primary/12" />
         <div className="absolute right-[18%] top-10 animate-sparkle text-3xl text-secondary-light" aria-hidden="true">✦</div>
         <div className="relative mx-auto max-w-3xl">
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-white/70">Conteúdo e novidades</p>
-          <h2 className="mt-3 font-display text-5xl">Receba escolhas mais conscientes no seu e-mail</h2>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/70 sm:text-xs sm:tracking-[0.22em]">Conteúdo e novidades</p>
+          <h2 className="mt-3 font-display text-4xl leading-[1.02] sm:text-5xl">Receba escolhas mais conscientes no seu e-mail</h2>
           <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-white/78">
             Novos produtos, orientações de uso, promoções e cupons para ajudar você a ensinar primeiro e comprar com mais clareza.
           </p>
@@ -24,7 +24,7 @@ export default function Footer() {
         </div>
       </section>
 
-      <div className="mx-auto grid max-w-7xl gap-10 px-5 py-14 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1.3fr]">
+      <div className="mx-auto grid max-w-7xl gap-9 px-4 py-10 sm:grid-cols-2 sm:px-5 sm:py-14 lg:grid-cols-[1fr_1fr_1.3fr]">
         <div>
           <h3 className="font-display text-3xl">Comprar</h3>
           <ul className="mt-5 space-y-2 text-sm text-text-light">
@@ -47,7 +47,7 @@ export default function Footer() {
           </ul>
         </div>
 
-        <div className="lg:text-right">
+        <div className="sm:col-span-2 lg:col-span-1 lg:text-right">
           <div className="inline-flex items-center gap-3 rounded-full bg-background-alt px-4 py-2">
             <span className="animate-bob text-xl" aria-hidden="true">♡</span>
             <p className="text-[10px] font-black uppercase tracking-[0.16em] text-secondary">Atendimento humanizado</p>
@@ -55,7 +55,7 @@ export default function Footer() {
           <h3 className="mt-4 font-display text-3xl">Precisa de ajuda?</h3>
           <p className="mt-5 text-sm leading-6 text-text-light">
             Atendimento de segunda a sexta, das 9h às 18h.<br />
-            <a href="mailto:info@brinqueteando.online" className="font-bold text-secondary hover:underline">
+            <a href="mailto:info@brinqueteando.online" className="break-all font-bold text-secondary hover:underline">
               info@brinqueteando.online
             </a>
           </p>
@@ -63,7 +63,7 @@ export default function Footer() {
             Curadoria de <strong className="text-primary">Margareth Almeida</strong><br />
             Neuropsicopedagoga
           </p>
-          <div className="mt-7 flex gap-4 lg:justify-end">
+          <div className="mt-7 flex flex-wrap gap-4 lg:justify-end">
             <a href="https://www.instagram.com/neuromargarethapoio/" target="_blank" rel="noreferrer" className="nav-link text-xs font-black uppercase tracking-[0.16em] hover:text-secondary">Instagram</a>
             <a href="https://www.tiktok.com/@neuromargarethapoio" target="_blank" rel="noreferrer" className="nav-link text-xs font-black uppercase tracking-[0.16em] hover:text-secondary">TikTok</a>
           </div>
