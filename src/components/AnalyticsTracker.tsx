@@ -32,11 +32,14 @@ export default function AnalyticsTracker() {
 
   useEffect(() => {
     function trackCurrentPage() {
-      if (!analyticsConsentGranted()) return;
+      if (!analyticsConsentGranted() || pathname.startsWith("/dashboard")) return;
       pageStartedAt.current = Date.now();
       maxScroll.current = scrollPercent();
       thresholdsSent.current = new Set();
       trackAnalytics("page_view");
+      if (pathname.startsWith("/produto/")) trackAnalytics("product_view");
+      if (pathname === "/carrinho") trackAnalytics("cart_view");
+      if (pathname.startsWith("/checkout")) trackAnalytics("checkout_started");
     }
 
     trackCurrentPage();
