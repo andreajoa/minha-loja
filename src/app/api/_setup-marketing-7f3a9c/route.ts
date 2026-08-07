@@ -15,7 +15,7 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const SETUP_TOKEN_HASH = "ac3ad57e5c63922a0d5f33b06c16506b7faf48e13cf493757c6bd6ce718acde6";
+const SETUP_TOKEN_HASH = "9f8f29df0191f062398103f562ea5c446f03a327b7325dfd78b06dc1c7747be7";
 const wait = (ms = 650) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function authorized(req: Request) {
