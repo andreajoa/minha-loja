@@ -164,15 +164,25 @@ function CategoryFramesSection() {
           <h2 className="mt-3 font-display text-4xl leading-none text-primary sm:text-5xl">Explore as categorias</h2>
         </div>
 
-        <div className="mx-auto mt-12 grid max-w-6xl gap-x-5 gap-y-14 sm:mt-14 sm:grid-cols-2 sm:gap-y-16 lg:grid-cols-4">
+        <div className="mx-auto mt-9 grid max-w-6xl grid-cols-2 gap-4 sm:mt-14 sm:gap-6 lg:grid-cols-4">
           {definitions.map((item) => (
-            <Link key={item.label} href={`/colecoes?categoria=${encodeURIComponent(item.category)}`} className="group relative block pt-16 sm:pt-20">
-              <div className="relative min-h-[220px] overflow-visible rounded-2xl bg-[#3a2a22] px-4 pb-7 pt-28 text-center shadow-[0_24px_55px_rgba(9,38,71,0.12)] transition duration-300 group-hover:-translate-y-2 group-hover:bg-secondary sm:min-h-[250px] sm:px-5 sm:pb-8 sm:pt-32">
-                <div className="absolute -top-20 left-1/2 h-48 w-[90%] -translate-x-1/2 overflow-hidden rounded-[1.5rem] border-6 border-background bg-white shadow-xl transition duration-500 group-hover:-translate-y-2 group-hover:scale-[1.02] sm:-top-24 sm:h-56 sm:w-[88%] sm:rounded-[1.7rem] sm:border-8">
-                  <img src={item.image} alt={`Categoria ${item.label}`} className="h-full w-full object-cover" />
-                </div>
-                <h3 className="font-display text-3xl text-white sm:text-4xl">{item.label}</h3>
-                <p className="mt-3 text-xs font-bold uppercase tracking-[0.15em] text-white/65">Ver produtos</p>
+            <Link
+              key={item.label}
+              href={`/colecoes?categoria=${encodeURIComponent(item.category)}`}
+              className="group flex min-w-0 flex-col overflow-hidden rounded-[1.35rem] bg-[#3a2a22] shadow-[0_18px_45px_rgba(9,38,71,0.10)] transition duration-300 hover:-translate-y-1 hover:bg-secondary sm:rounded-[1.8rem]"
+            >
+              <div className="m-2 aspect-[4/3] overflow-hidden rounded-[1rem] border-4 border-background bg-[#f7f2ee] sm:m-3 sm:rounded-[1.35rem] sm:border-6">
+                <img
+                  src={item.image}
+                  alt={`Categoria ${item.label}`}
+                  className="h-full w-full object-contain object-center p-1 transition duration-500 group-hover:scale-[1.02] sm:p-2"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              <div className="flex min-h-[92px] flex-1 flex-col items-center justify-center px-2 pb-4 pt-1 text-center sm:min-h-[120px] sm:px-4 sm:pb-6 sm:pt-2">
+                <h3 className="font-display text-[1.65rem] leading-none text-white sm:text-4xl">{item.label}</h3>
+                <p className="mt-2 text-[9px] font-bold uppercase tracking-[0.13em] text-white/70 sm:mt-3 sm:text-xs sm:tracking-[0.15em]">Ver produtos</p>
               </div>
             </Link>
           ))}
