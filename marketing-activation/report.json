@@ -1,32 +1,95 @@
 {
   "templates1": {
-    "http_status": "500",
+    "http_status": "200",
     "response": {
-      "raw": "{\"ok\":false,\"error\":\"brinqueteando-newsletter-01: This API key is restricted to only send emails\"}{\"ok\":false,\"error\":\"brinqueteando-newsletter-01: This API key is restricted to only send emails\"}{\"ok\":false,\"error\":\"brinqueteando-newsletter-01: This API key is restricted to only send emails\"}"
+      "ok": true,
+      "phase": "templates1",
+      "completed": [
+        "brinqueteando-newsletter-01",
+        "brinqueteando-newsletter-02",
+        "brinqueteando-newsletter-03",
+        "brinqueteando-newsletter-04",
+        "brinqueteando-newsletter-05",
+        "brinqueteando-newsletter-06",
+        "brinqueteando-newsletter-07"
+      ]
     }
   },
   "templates2": {
-    "http_status": "500",
+    "http_status": "200",
     "response": {
-      "raw": "{\"ok\":false,\"error\":\"brinqueteando-newsletter-08: This API key is restricted to only send emails\"}{\"ok\":false,\"error\":\"brinqueteando-newsletter-08: This API key is restricted to only send emails\"}{\"ok\":false,\"error\":\"brinqueteando-newsletter-08: This API key is restricted to only send emails\"}"
+      "ok": true,
+      "phase": "templates2",
+      "completed": [
+        "brinqueteando-newsletter-08",
+        "brinqueteando-newsletter-09",
+        "brinqueteando-newsletter-10",
+        "brinqueteando-newsletter-11",
+        "brinqueteando-newsletter-12",
+        "brinqueteando-newsletter-13",
+        "brinqueteando-newsletter-14"
+      ]
     }
   },
   "templates3": {
-    "http_status": "500",
+    "http_status": "200",
     "response": {
-      "raw": "{\"ok\":false,\"error\":\"brinqueteando-newsletter-15: This API key is restricted to only send emails\"}{\"ok\":false,\"error\":\"brinqueteando-newsletter-15: This API key is restricted to only send emails\"}{\"ok\":false,\"error\":\"brinqueteando-newsletter-15: This API key is restricted to only send emails\"}"
+      "ok": true,
+      "phase": "templates3",
+      "completed": [
+        "brinqueteando-newsletter-15",
+        "brinqueteando-cart-01",
+        "brinqueteando-cart-02",
+        "brinqueteando-cart-03",
+        "brinqueteando-cart-04",
+        "brinqueteando-cart-05",
+        "brinqueteando-checkout-01"
+      ]
     }
   },
   "templates4": {
-    "http_status": "500",
+    "http_status": "200",
     "response": {
-      "raw": "{\"ok\":false,\"error\":\"brinqueteando-checkout-02: This API key is restricted to only send emails\"}{\"ok\":false,\"error\":\"brinqueteando-checkout-02: This API key is restricted to only send emails\"}{\"ok\":false,\"error\":\"brinqueteando-checkout-02: This API key is restricted to only send emails\"}"
+      "ok": true,
+      "phase": "templates4",
+      "completed": [
+        "brinqueteando-checkout-02",
+        "brinqueteando-checkout-03",
+        "brinqueteando-checkout-04",
+        "brinqueteando-checkout-05"
+      ]
     }
   },
   "automations": {
-    "http_status": "500",
+    "http_status": "200",
     "response": {
-      "raw": "{\"ok\":false,\"error\":\"This API key is restricted to only send emails\"}{\"ok\":false,\"error\":\"This API key is restricted to only send emails\"}{\"ok\":false,\"error\":\"This API key is restricted to only send emails\"}"
+      "ok": true,
+      "phase": "automations",
+      "events": [
+        "newsletter.subscribed: criada",
+        "cart.recovery_started: criada",
+        "cart.recovery_stop: criada",
+        "checkout.recovery_started: criada",
+        "checkout.recovery_stop: criada",
+        "order.completed: criada"
+      ],
+      "automations": [
+        {
+          "name": "BrinqueTEAndo - Newsletter 15 emails",
+          "id": "019fdda4-f03c-741b-b552-364181cd321a",
+          "status": "created"
+        },
+        {
+          "name": "BrinqueTEAndo - Carrinho abandonado 5 emails",
+          "id": "019fdda4-f621-70c9-bba4-48d5a96da94f",
+          "status": "created"
+        },
+        {
+          "name": "BrinqueTEAndo - Checkout abandonado 5 emails",
+          "id": "019fdda4-fba9-735a-b2dc-88433b684bc8",
+          "status": "created"
+        }
+      ]
     }
   },
   "stripe": {
@@ -34,7 +97,7 @@
     "response": {
       "ok": true,
       "phase": "stripe",
-      "webhook": "created",
+      "webhook": "existing",
       "id": "we_1U1fRKG3HxcyUpFWHWTSGc8f",
       "url": "https://www.brinqueteando.online/api/marketing/stripe-event"
     }
