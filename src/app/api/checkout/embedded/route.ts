@@ -205,7 +205,15 @@ export async function POST(req: Request) {
         const recoveryUrl = `${appUrl}/carrinho?restore=${encodeURIComponent(cartMetadata)}`;
         const productImage = new URL(first.image, appUrl).toString();
         const resend = new Resend(process.env.RESEND_API_KEY);
-        const result = await resend.events.send({
+
+        const stopCart = await resend.events.send({
+          event: "cart.recovery_stop",
+          email: marketingEmail,
+          payload: { reason: "checkout_started" },
+        });
+        if (stopCart.error) console.error("Cart recovery stop at checkout:", stopCart.error);
+
+        const startCheckout = await resend.events.send({
           event: "checkout.recovery_started",
           email: marketingEmail,
           payload: {
@@ -216,7 +224,7 @@ export async function POST(req: Request) {
             cartTotal: formatMoney(discount.totalAfterDiscount + shipping.amount),
           },
         });
-        if (result.error) console.error("Checkout recovery event:", result.error);
+        if (startCheckout.error) console.error("Checkout recovery event:", startCheckout.error);
       } catch (marketingError) {
         console.error("Checkout recovery exception:", marketingError);
       }
