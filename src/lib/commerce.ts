@@ -9,6 +9,7 @@ import {
 export type CartLine = {
   id: string;
   quantity: number;
+  variantId?: string;
 };
 
 export type DiscountTier = {
@@ -29,35 +30,89 @@ export const DISCOUNT_TIERS: DiscountTier[] = [
   { minimum: 50_000, percent: 20, label: "20% de desconto" },
 ];
 
+export function variantIdFor(
+  product: Product,
+  variant: NonNullable<Product["variants"]>[number],
+) {
+  const index = product.variants?.indexOf(variant) ?? -1;
+  return `variant-${Math.max(0, index)}`;
+}
+
+export function resolveCartLine(line: CartLine) {
+  if (!line || typeof line.id !== "string") {
+    throw new Error("Produto inválido.");
+  }
+
+  const quantity = Number(line.quantity);
+  if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) {
+    throw new Error("Quantidade inválida.");
+  }
+
+  const product = products.find((candidate) => candidate.id === line.id);
+  if (!product) throw new Error("Produto não encontrado.");
+
+  const variants = product.variants || [];
+  let variant: NonNullable<Product["variants"]>[number] | null = null;
+
+  if (variants.length > 0) {
+    variant =
+      variants.find(
+        (candidate) => variantIdFor(product, candidate) === line.variantId,
+      ) ||
+      variants.find((candidate) => candidate.stock > 0) ||
+      null;
+
+    if (!variant) {
+      throw new Error(`Nenhuma variante disponível para ${product.name}.`);
+    }
+  }
+
+  const variantId = variant ? variantIdFor(product, variant) : undefined;
+  const unitPrice = variant ? variant.price : product.price;
+  const availableStock = variant ? variant.stock : product.stock;
+
+  if (availableStock <= 0 || quantity > availableStock) {
+    throw new Error(
+      `Estoque insuficiente para ${product.name}${variant ? ` · ${variant.name}` : ""}.`,
+    );
+  }
+
+  return {
+    product,
+    variant,
+    variantId,
+    unitPrice,
+    availableStock,
+    quantity,
+  };
+}
+
 export function normalizeCart(lines: CartLine[]) {
   if (!Array.isArray(lines) || lines.length === 0 || lines.length > 20) {
     throw new Error("Carrinho inválido.");
   }
 
-  const merged = new Map<string, number>();
+  const merged = new Map<string, CartLine>();
 
-  for (const line of lines) {
-    if (!line || typeof line.id !== "string") throw new Error("Produto inválido.");
-    const quantity = Number(line.quantity);
-    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) {
-      throw new Error("Quantidade inválida.");
-    }
-    merged.set(line.id, Math.min(10, (merged.get(line.id) || 0) + quantity));
+  for (const rawLine of lines) {
+    const resolved = resolveCartLine(rawLine);
+    const key = `${resolved.product.id}::${resolved.variantId || "base"}`;
+    const current = merged.get(key);
+    const quantity = Math.min(10, (current?.quantity || 0) + resolved.quantity);
+
+    merged.set(key, {
+      id: resolved.product.id,
+      quantity,
+      ...(resolved.variantId ? { variantId: resolved.variantId } : {}),
+    });
   }
 
-  return Array.from(merged.entries()).map(([id, quantity]) => {
-    const product = products.find((candidate) => candidate.id === id);
-    if (!product) throw new Error("Produto não encontrado.");
-    if (product.stock <= 0 || quantity > product.stock) {
-      throw new Error(`Estoque insuficiente para ${product.name}.`);
-    }
-    return { product, quantity };
-  });
+  return Array.from(merged.values()).map(resolveCartLine);
 }
 
 export function getCartSubtotal(lines: CartLine[]) {
   return normalizeCart(lines).reduce(
-    (total, line) => total + line.product.price * line.quantity,
+    (total, line) => total + line.unitPrice * line.quantity,
     0,
   );
 }
@@ -164,9 +219,7 @@ export function getOrderBump(lines: CartLine[]) {
 export function getUpsell(lines: CartLine[]) {
   const normalized = normalizeCart(lines);
   const cartIds = new Set(normalized.map((line) => line.product.id));
-  const highestPrice = Math.max(
-    ...normalized.map((line) => line.product.price),
-  );
+  const highestPrice = Math.max(...normalized.map((line) => line.unitPrice));
 
   return (
     notInCart(cartIds)
@@ -247,25 +300,45 @@ export function getPackageMetrics(lines: CartLine[]) {
 
 export function serializeCart(lines: CartLine[]) {
   return normalizeCart(lines)
-    .map(({ product, quantity }) => `${product.id}:${quantity}`)
+    .map(({ product, variantId, quantity }) => {
+      const variantPart = variantId ? `~${encodeURIComponent(variantId)}` : "";
+      return `${product.id}${variantPart}:${quantity}`;
+    })
     .join(",")
     .slice(0, 500);
 }
 
 export function parseSerializedCart(value?: string | null): CartLine[] {
   if (!value) return [];
+
   return value
     .split(",")
     .map((entry) => {
-      const [id, quantity] = entry.split(":");
-      return { id, quantity: Number(quantity) };
+      const colon = entry.lastIndexOf(":");
+      if (colon <= 0) return null;
+
+      const identity = entry.slice(0, colon);
+      const quantity = Number(entry.slice(colon + 1));
+      const tilde = identity.indexOf("~");
+      const id = tilde >= 0 ? identity.slice(0, tilde) : identity;
+      const variantId =
+        tilde >= 0 ? decodeURIComponent(identity.slice(tilde + 1)) : undefined;
+
+      return {
+        id,
+        quantity,
+        ...(variantId ? { variantId } : {}),
+      };
     })
     .filter(
-      (line) =>
-        typeof line.id === "string" &&
-        line.id.length > 0 &&
-        Number.isInteger(line.quantity) &&
-        line.quantity > 0,
+      (line): line is CartLine =>
+        Boolean(
+          line &&
+            typeof line.id === "string" &&
+            line.id.length > 0 &&
+            Number.isInteger(line.quantity) &&
+            line.quantity > 0,
+        ),
     );
 }
 
