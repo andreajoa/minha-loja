@@ -1,17 +1,54 @@
+import PolicyPage from "@/components/PolicyPage";
+
 export default function Cookies() {
   return (
-    <article className="prose mx-auto max-w-3xl px-4 py-16">
-      <h1 className="text-3xl font-bold text-teal-dark">Politica de Cookies</h1>
-      <p className="mt-2 text-sm opacity-60">Ultima atualizacao: agosto de 2025</p>
-
-      <h2 className="mt-8 text-xl font-bold">1. O que sao cookies</h2>
-      <p>Cookies sao pequenos arquivos guardados no seu navegador que ajudam o site a funcionar e a lembrar suas preferencias.</p>
-
-      <h2 className="mt-8 text-xl font-bold">2. Cookies que usamos</h2>
-      <p>Usamos cookies essenciais (carrinho, sessao) e cookies de analise para entender como melhorar a loja.</p>
-
-      <h2 className="mt-8 text-xl font-bold">3. Gerenciamento</h2>
-      <p>Voce pode bloquear ou apagar cookies nas configuracoes do seu navegador. Alguns recursos podem deixar de funcionar corretamente.</p>
-    </article>
+    <PolicyPage
+      eyebrow="Transparência digital"
+      title="Política de Cookies"
+      intro="Cookies e tecnologias semelhantes ajudam a manter funções da loja, lembrar preferências e proteger a navegação."
+      sections={[
+        {
+          title: "O que são cookies",
+          content: (
+            <>
+              <p>Cookies são pequenos arquivos ou identificadores armazenados pelo navegador. Eles podem ser usados para manter uma sessão, lembrar escolhas e permitir que determinados recursos funcionem corretamente.</p>
+            </>
+          ),
+        },
+        {
+          title: "Cookies essenciais",
+          content: (
+            <>
+              <p>Alguns recursos dependem de armazenamento local ou cookies essenciais, como autenticação, segurança, carrinho, preferências e prevenção de abuso. Sem eles, partes da loja podem não funcionar como esperado.</p>
+            </>
+          ),
+        },
+        {
+          title: "Medição e desempenho",
+          content: (
+            <>
+              <p>Quando ferramentas de medição forem utilizadas, elas poderão gerar dados técnicos sobre acesso, dispositivo e desempenho para ajudar a entender problemas e melhorar a experiência.</p>
+            </>
+          ),
+        },
+        {
+          title: "Como controlar",
+          content: (
+            <>
+              <p>Você pode apagar ou bloquear cookies e dados do site nas configurações do navegador. Ao fazer isso, carrinho, login, preferências ou outras funcionalidades podem ser redefinidos.</p>
+            </>
+          ),
+        },
+        {
+          title: "Cookies de terceiros",
+          content: (
+            <>
+              <p>Serviços necessários à operação, como autenticação, pagamento e hospedagem, podem utilizar cookies ou tecnologias próprias conforme suas políticas e a finalidade do serviço.</p>
+            </>
+          ),
+        },
+      ]}
+      note={<p>Se ferramentas futuras exigirem consentimento específico para cookies não essenciais, a loja deverá apresentar controles adequados antes da ativação dessas tecnologias.</p>}
+    />
   );
 }
