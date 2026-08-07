@@ -1,14 +1,18 @@
 import Stripe from "stripe";
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { Resend } from "resend";
 import {
   applyPercentDiscount,
   calculateDiscount,
+  formatMoney,
   normalizeCart,
   serializeCart,
   type CartLine,
 } from "@/lib/commerce";
 import { quoteShipping } from "@/lib/shipping-server";
 import { BASE_PATH } from "@/lib/paths";
+import { verifyMarketingToken } from "@/lib/marketing-token";
 
 export const runtime = "nodejs";
 
@@ -72,41 +76,38 @@ export async function POST(req: Request) {
           ? `Desconto progressivo de ${discount.tier.percent}% aplicado.`
           : "";
 
+    const cookieStore = await cookies();
+    const marketingEmail = cookieStore.get("bt_marketing_email")?.value || "";
+    const marketingToken = cookieStore.get("bt_marketing_token")?.value || "";
+    const canRecover = Boolean(
+      marketingEmail && verifyMarketingToken(marketingToken, marketingEmail),
+    );
+
     const session = await stripe.checkout.sessions.create({
       ui_mode: "embedded_page",
       mode: "payment",
       locale: "pt-BR",
       payment_method_types: ["card"],
       customer_creation: "always",
+      ...(canRecover ? { customer_email: marketingEmail } : {}),
       saved_payment_method_options: { payment_method_save: "enabled" },
       billing_address_collection: "required",
       shipping_address_collection: { allowed_countries: ["BR"] },
+      expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
       custom_fields: [
         {
           key: "whatsapp",
-          label: {
-            type: "custom",
-            custom: "WhatsApp com DDD",
-          },
+          label: { type: "custom", custom: "WhatsApp com DDD" },
           type: "text",
           optional: false,
-          text: {
-            minimum_length: 10,
-            maximum_length: 20,
-          },
+          text: { minimum_length: 10, maximum_length: 20 },
         },
         {
           key: "referencia",
-          label: {
-            type: "custom",
-            custom: "Bairro, complemento e referência",
-          },
+          label: { type: "custom", custom: "Bairro, complemento e referência" },
           type: "text",
           optional: false,
-          text: {
-            minimum_length: 2,
-            maximum_length: 160,
-          },
+          text: { minimum_length: 2, maximum_length: 160 },
         },
       ],
       custom_text: {
@@ -175,6 +176,7 @@ export async function POST(req: Request) {
         shippingLabel: shipping.label.slice(0, 200),
         destinationCep: shippingQuote.cep,
         destinationCity: shippingQuote.city.slice(0, 100),
+        marketingRecovery: String(canRecover),
         postPurchaseOfferViewed: "false",
         postPurchaseOfferClaimed: "false",
       },
@@ -195,6 +197,29 @@ export async function POST(req: Request) {
         { error: "A Stripe não retornou o checkout incorporado." },
         { status: 502 },
       );
+    }
+
+    if (canRecover && process.env.RESEND_API_KEY) {
+      try {
+        const first = normalizedCart[0].product;
+        const recoveryUrl = `${appUrl}/carrinho?restore=${encodeURIComponent(cartMetadata)}`;
+        const productImage = new URL(first.image, appUrl).toString();
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        const result = await resend.events.send({
+          event: "checkout.recovery_started",
+          email: marketingEmail,
+          payload: {
+            productName: first.name,
+            productImage,
+            productUrl: `${appUrl}/produto/${first.id}`,
+            recoveryUrl,
+            cartTotal: formatMoney(discount.totalAfterDiscount + shipping.amount),
+          },
+        });
+        if (result.error) console.error("Checkout recovery event:", result.error);
+      } catch (marketingError) {
+        console.error("Checkout recovery exception:", marketingError);
+      }
     }
 
     return NextResponse.json({
