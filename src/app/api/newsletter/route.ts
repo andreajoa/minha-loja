@@ -90,7 +90,7 @@ export async function POST(req: Request) {
     }
 
     const couponBlock = source === "popup"
-      ? `<div style="margin:24px 0;padding:20px;border-radius:16px;background:#F2E6DE;text-align:center"><p style="margin:0 0 8px;font-size:13px;color:#A14D2A;font-weight:700;text-transform:uppercase;letter-spacing:.12em">Seu cupom de boas-vindas</p><p style="margin:0;font-size:30px;color:#09274B;font-weight:900;letter-spacing:.08em">${NEWSLETTER_COUPON_CODE}</p><p style="margin:10px 0 0;font-size:14px;color:#435367">Use no carrinho para receber 5% de desconto. Se houver desconto progressivo maior, aplicamos automaticamente a melhor condição.</p></div>`
+      ? `<div style="margin:24px 0;padding:20px;border-radius:16px;background:#F2E6DE;text-align:center"><p style="margin:0 0 8px;font-size:13px;color:#A64B2A;font-weight:700;text-transform:uppercase;letter-spacing:.12em">Seu cupom de boas-vindas</p><p style="margin:0;font-size:30px;color:#09274B;font-weight:900;letter-spacing:.08em">${NEWSLETTER_COUPON_CODE}</p><p style="margin:10px 0 0;font-size:14px;color:#435367">Use no carrinho para receber 5% de desconto. Se houver desconto progressivo maior, aplicamos automaticamente a melhor condição.</p></div>`
       : "";
 
     try {
@@ -151,20 +151,31 @@ export async function POST(req: Request) {
     }
 
     const marketingToken = createMarketingToken(email);
-
-    return NextResponse.json({
+    const response = NextResponse.json({
       ok: true,
       couponCode: source === "popup" ? NEWSLETTER_COUPON_CODE : undefined,
       emailSent: confirmationSent,
       contactSaved,
       ownerNotificationSent: storeNotificationSent,
       automationTriggered,
-      marketingToken,
-      marketingEmail: email,
       message: confirmationSent
         ? "Sua inscrição foi confirmada. É uma honra saber que você quer receber promoções, cupons de desconto e muito mais em nossa newsletter!"
         : "Seu cadastro foi recebido e seu benefício está liberado. Anote o cupom exibido nesta tela.",
     });
+
+    if (marketingToken) {
+      const cookieOptions = {
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax" as const,
+        path: "/",
+        maxAge: 365 * 24 * 60 * 60,
+      };
+      response.cookies.set("bt_marketing_email", email, cookieOptions);
+      response.cookies.set("bt_marketing_token", marketingToken, cookieOptions);
+    }
+
+    return response;
   } catch (error) {
     console.error("Newsletter error:", error);
     return NextResponse.json(
