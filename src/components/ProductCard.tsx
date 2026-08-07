@@ -7,17 +7,19 @@ export default function ProductCard({ product }: { product: Product }) {
     <article className="brand-card group flex h-full min-w-0 flex-col overflow-hidden rounded-[1.5rem] border border-border/50 bg-white sm:rounded-[2rem]">
       <Link
         href={`/produto/${product.id}`}
-        className="relative block aspect-[4/3] overflow-hidden bg-background-alt sm:aspect-square"
+        className="relative block aspect-square overflow-hidden bg-background-alt"
       >
         <div className="absolute -right-10 -top-10 z-10 h-28 w-28 rounded-full border border-secondary-light/30" />
         {product.image ? (
-          <img
-            src={product.image}
-            alt={product.name}
-            className="h-full w-full object-contain p-3 transition duration-700 group-hover:scale-[1.03] sm:p-5"
-            loading="lazy"
-            decoding="async"
-          />
+          <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-6">
+            <img
+              src={product.image}
+              alt={product.name}
+              className="max-h-full max-w-full object-contain object-center transition duration-700 group-hover:scale-[1.03]"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
         ) : (
           <div className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(circle_at_50%_42%,rgba(255,255,255,0.94),transparent_40%),linear-gradient(145deg,#FDF9F6,#F2E6DE_58%,#E5D0C3)]">
             <span className="category-emoji text-7xl drop-shadow-[0_20px_26px_rgba(9,38,71,0.16)] sm:text-8xl" aria-hidden="true">{product.emoji}</span>
