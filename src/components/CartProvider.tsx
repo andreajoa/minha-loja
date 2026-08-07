@@ -9,6 +9,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { products } from "@/data/products";
+import { trackAnalytics } from "@/lib/analytics-client";
 
 export type CartItem = {
   id: string;
@@ -26,6 +28,10 @@ type CartContextValue = {
 
 const STORAGE_KEY = "brinqueteando-cart-v1";
 const CartContext = createContext<CartContextValue | null>(null);
+
+function productFor(id: string) {
+  return products.find((item) => item.id === id);
+}
 
 export default function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
@@ -61,6 +67,14 @@ export default function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = useCallback((id: string, quantity = 1) => {
     const safeQuantity = Math.max(1, Math.min(10, Math.trunc(quantity)));
+    const product = productFor(id);
+    trackAnalytics("add_to_cart", {
+      productId: id,
+      productName: product?.name || "",
+      valueCents: (product?.price || 0) * safeQuantity,
+      quantity: safeQuantity,
+    });
+
     setItems((current) => {
       const existing = current.find((item) => item.id === id);
       if (!existing) return [...current, { id, quantity: safeQuantity }];
@@ -73,12 +87,24 @@ export default function CartProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateQuantity = useCallback((id: string, quantity: number) => {
+    const product = productFor(id);
     if (quantity <= 0) {
+      trackAnalytics("remove_from_cart", {
+        productId: id,
+        productName: product?.name || "",
+        properties: { reason: "quantity_zero" },
+      });
       setItems((current) => current.filter((item) => item.id !== id));
       return;
     }
 
     const safeQuantity = Math.max(1, Math.min(10, Math.trunc(quantity)));
+    trackAnalytics("cart_quantity_changed", {
+      productId: id,
+      productName: product?.name || "",
+      quantity: safeQuantity,
+      valueCents: (product?.price || 0) * safeQuantity,
+    });
     setItems((current) =>
       current.map((item) =>
         item.id === id ? { ...item, quantity: safeQuantity } : item,
@@ -87,10 +113,18 @@ export default function CartProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const removeItem = useCallback((id: string) => {
+    const product = productFor(id);
+    trackAnalytics("remove_from_cart", {
+      productId: id,
+      productName: product?.name || "",
+    });
     setItems((current) => current.filter((item) => item.id !== id));
   }, []);
 
-  const clearCart = useCallback(() => setItems([]), []);
+  const clearCart = useCallback(() => {
+    trackAnalytics("cart_cleared");
+    setItems([]);
+  }, []);
 
   const value = useMemo<CartContextValue>(
     () => ({
