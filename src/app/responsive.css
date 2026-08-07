@@ -1,0 +1,205 @@
+/* Base responsiva global da BrinqueTEAndo. */
+html {
+  max-width: 100%;
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  min-width: 320px;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+main,
+header,
+footer,
+section,
+article,
+aside,
+nav,
+form,
+fieldset {
+  min-width: 0;
+  max-width: 100%;
+}
+
+img,
+picture,
+video,
+canvas,
+svg,
+iframe {
+  max-width: 100%;
+}
+
+img,
+video {
+  height: auto;
+}
+
+button,
+input,
+select,
+textarea {
+  max-width: 100%;
+  font: inherit;
+}
+
+h1,
+h2,
+h3,
+p,
+a,
+button,
+label,
+summary {
+  overflow-wrap: anywhere;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.overflow-x-auto {
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+/* Fotografias de produtos devem aparecer inteiras, sem deformação. */
+article.brand-card a.aspect-square {
+  background: #fdf9f6;
+}
+
+article.brand-card a.aspect-square > img {
+  object-fit: contain !important;
+  object-position: center !important;
+  padding: clamp(0.6rem, 2.2vw, 1.35rem);
+}
+
+.storybook-shadow > img,
+.product-main-image {
+  object-fit: contain !important;
+  object-position: center !important;
+  background: #fdf9f6;
+  padding: clamp(0.75rem, 3vw, 2rem);
+}
+
+/* Stripe e conteúdos incorporados nunca podem ultrapassar a tela. */
+iframe,
+[data-testid="embedded-checkout"],
+.StripeElement {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+/* Tabelas administrativas ou informativas passam a rolar quando necessário. */
+table {
+  max-width: 100%;
+}
+
+@media (max-width: 767px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  button,
+  a {
+    touch-action: manipulation;
+  }
+
+  table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .brand-card:hover,
+  .group:hover {
+    transform: none;
+  }
+
+  /* Evita que textos longos de preço, cupom e referência estourem cartões. */
+  [class*="tracking-"] {
+    word-break: normal;
+  }
+}
+
+@media (max-width: 639px) {
+  /* Cabeçalho compacto, legível e sem colisão entre logo e carrinho. */
+  header > div.mx-auto.grid {
+    grid-template-columns: 42px minmax(0, 1fr) 42px !important;
+    gap: 0.35rem;
+    padding-inline: 0.75rem !important;
+    padding-block: 0.7rem !important;
+  }
+
+  header > div.mx-auto.grid > a[aria-label*="BrinqueTEAndo"] {
+    justify-self: center;
+    max-width: 100%;
+    font-size: clamp(1.1rem, 6vw, 1.45rem) !important;
+    letter-spacing: 0.045em !important;
+    white-space: nowrap;
+  }
+
+  header nav > div {
+    justify-content: flex-start !important;
+    gap: 1.15rem !important;
+    padding-inline: 0.85rem !important;
+    font-size: 0.625rem !important;
+  }
+
+  /* Botões e controles mantêm uma área confortável para toque. */
+  button,
+  input,
+  select,
+  textarea,
+  a.rounded-full,
+  a.rounded-md,
+  a.rounded-2xl {
+    min-height: 44px;
+  }
+
+  /* Cartões grandes deixam de depender de alturas fixas no celular. */
+  [class*="min-h-[520px]"],
+  [class*="min-h-[680px]"] {
+    min-height: auto !important;
+  }
+
+  /* Margens laterais seguras para modais e painéis fixos. */
+  [role="dialog"] {
+    width: calc(100vw - 1rem) !important;
+    max-width: calc(100vw - 1rem) !important;
+  }
+
+  /* Imagens editoriais mantêm altura útil sem ficar achatadas. */
+  section img.aspect-\[3\/1\] {
+    aspect-ratio: 4 / 3 !important;
+  }
+
+  /* Rodapé e formulários nunca mantêm campos excessivamente largos. */
+  footer form {
+    width: 100%;
+  }
+
+  footer form input,
+  footer form button {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
