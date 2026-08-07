@@ -116,7 +116,7 @@ function parseProductId(path: string) {
 }
 
 export function getAnalyticsIdentity() {
-  if (typeof window === "undefined" || !analyticsConsentGranted()) {
+  if (typeof window === "undefined" || !analyticsConsentGranted() || window.location.pathname.startsWith("/dashboard")) {
     return { sessionId: "", visitorId: "" };
   }
   const session = getSessionState();
@@ -157,7 +157,12 @@ function buildPayload(eventName: string, details: TrackDetails = {}) {
 }
 
 export function trackAnalytics(eventName: string, details: TrackDetails = {}, useBeacon = false) {
-  if (typeof window === "undefined" || !analyticsConsentGranted()) return;
+  if (
+    typeof window === "undefined" ||
+    !analyticsConsentGranted() ||
+    window.location.pathname.startsWith("/dashboard")
+  ) return;
+
   const payload = buildPayload(eventName, details);
   const body = JSON.stringify(payload);
 
