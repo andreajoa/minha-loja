@@ -11,7 +11,10 @@ import { verifyMarketingToken } from "@/lib/marketing-token";
 
 export const runtime = "nodejs";
 
-type Payload = { cart?: CartLine[] };
+type Payload = {
+  cart?: CartLine[];
+  action?: "start" | "stop";
+};
 
 export async function POST(req: Request) {
   try {
@@ -26,6 +29,18 @@ export async function POST(req: Request) {
     }
 
     const payload = (await req.json()) as Payload;
+    const resend = new Resend(apiKey);
+
+    if (payload.action === "stop") {
+      const result = await resend.events.send({
+        event: "cart.recovery_stop",
+        email,
+        payload: { reason: "cart_empty_or_checkout_started" },
+      });
+      if (result.error) console.error("Cart recovery stop event:", result.error);
+      return NextResponse.json({ ok: true, stopped: !result.error });
+    }
+
     if (!Array.isArray(payload.cart) || payload.cart.length === 0) {
       return NextResponse.json({ ok: true, tracked: false });
     }
@@ -42,7 +57,6 @@ export async function POST(req: Request) {
     const productImage = new URL(first.image, origin).toString();
     const productUrl = `${origin}/produto/${first.id}`;
 
-    const resend = new Resend(apiKey);
     const result = await resend.events.send({
       event: "cart.recovery_started",
       email,
