@@ -171,16 +171,16 @@ function CategoryFramesSection() {
               href={`/colecoes?categoria=${encodeURIComponent(item.category)}`}
               className="group flex min-w-0 flex-col overflow-hidden rounded-[1.35rem] bg-[#3a2a22] shadow-[0_18px_45px_rgba(9,38,71,0.10)] transition duration-300 hover:-translate-y-1 hover:bg-secondary sm:rounded-[1.8rem]"
             >
-              <div className="m-2 aspect-[4/3] overflow-hidden rounded-[1rem] border-4 border-background bg-[#f7f2ee] sm:m-3 sm:rounded-[1.35rem] sm:border-6">
+              <div className="m-2 aspect-square overflow-hidden rounded-[1rem] border-4 border-background bg-[#f7f2ee] sm:m-3 sm:aspect-[4/3] sm:rounded-[1.35rem] sm:border-6">
                 <img
                   src={item.image}
                   alt={`Categoria ${item.label}`}
-                  className="h-full w-full object-contain object-center p-1 transition duration-500 group-hover:scale-[1.02] sm:p-2"
+                  className="h-full w-full object-contain object-center p-0.5 transition duration-500 group-hover:scale-[1.02] sm:p-2"
                   loading="lazy"
                   decoding="async"
                 />
               </div>
-              <div className="flex min-h-[92px] flex-1 flex-col items-center justify-center px-2 pb-4 pt-1 text-center sm:min-h-[120px] sm:px-4 sm:pb-6 sm:pt-2">
+              <div className="flex min-h-[86px] flex-1 flex-col items-center justify-center px-2 pb-4 pt-1 text-center sm:min-h-[120px] sm:px-4 sm:pb-6 sm:pt-2">
                 <h3 className="font-display text-[1.65rem] leading-none text-white sm:text-4xl">{item.label}</h3>
                 <p className="mt-2 text-[9px] font-bold uppercase tracking-[0.13em] text-white/70 sm:mt-3 sm:text-xs sm:tracking-[0.15em]">Ver produtos</p>
               </div>
