@@ -13,6 +13,7 @@ import CartRecoveryRestorer from "@/components/CartRecoveryRestorer";
 import InstagramStrip from "@/components/InstagramStrip";
 import NewsletterOfferPopup from "@/components/NewsletterOfferPopup";
 import WhatsAppFloatingButton from "@/components/WhatsAppFloatingButton";
+import AnalyticsTracker from "@/components/AnalyticsTracker";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.brinqueteando.online"),
@@ -49,6 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <html lang="pt-BR">
         <body className="flex min-h-screen flex-col antialiased">
           <CartProvider>
+            <AnalyticsTracker />
             <CartRecoveryTracker />
             <CartRecoveryRestorer />
             <Header />
