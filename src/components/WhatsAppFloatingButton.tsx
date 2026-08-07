@@ -7,7 +7,11 @@ const WHATSAPP_URL = "https://wa.link/clxfhl";
 export default function WhatsAppFloatingButton() {
   const pathname = usePathname();
 
-  if (pathname.startsWith("/checkout") || pathname.startsWith("/sucesso")) {
+  if (
+    pathname.startsWith("/checkout") ||
+    pathname.startsWith("/sucesso") ||
+    pathname.startsWith("/dashboard")
+  ) {
     return null;
   }
 
@@ -18,6 +22,7 @@ export default function WhatsAppFloatingButton() {
       rel="noopener noreferrer"
       aria-label="Tirar uma dúvida pelo WhatsApp"
       title="Tire sua dúvida pelo WhatsApp"
+      data-analytics-action="whatsapp"
       className="group fixed bottom-[calc(env(safe-area-inset-bottom)+5.5rem)] right-[max(1rem,env(safe-area-inset-right))] z-[60] flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_12px_30px_rgba(0,0,0,0.22)] transition duration-300 hover:-translate-y-1 hover:scale-[1.03] hover:bg-[#20BD5A] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#25D366]/30 max-[360px]:h-12 max-[360px]:w-12 sm:bottom-6 sm:right-6 sm:h-auto sm:w-auto sm:min-h-14 sm:gap-3 sm:px-5 sm:py-3"
     >
       <svg
