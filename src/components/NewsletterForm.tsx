@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { withBasePath } from "@/lib/paths";
+import { trackAnalytics } from "@/lib/analytics-client";
 
 type ApiResponse = {
   ok?: boolean;
@@ -36,6 +37,7 @@ export default function NewsletterForm() {
         throw new Error(data.error || "Não foi possível concluir sua inscrição.");
       }
 
+      trackAnalytics("newsletter_signup", { properties: { source: "footer" } });
       setStatus("success");
       setMessage(
         data.message ||
@@ -75,6 +77,7 @@ export default function NewsletterForm() {
         <button
           type="submit"
           disabled={status === "loading"}
+          data-analytics-action="newsletter_footer_submit"
           className="button-shimmer min-h-12 rounded-full bg-primary px-8 text-xs font-black uppercase tracking-[0.16em] text-white transition hover:-translate-y-1 hover:bg-secondary-light hover:text-primary disabled:cursor-wait disabled:opacity-70"
         >
           {status === "loading" ? "Inscrevendo..." : "Quero receber"}
