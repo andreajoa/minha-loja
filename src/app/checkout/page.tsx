@@ -9,8 +9,18 @@ export const metadata: Metadata = {
 export default async function CheckoutPage({
   searchParams,
 }: {
-  searchParams: Promise<{ cep?: string; shipping?: string }>;
+  searchParams: Promise<{
+    cep?: string;
+    shipping?: string;
+    coupon?: string;
+  }>;
 }) {
-  const { cep = "", shipping = "" } = await searchParams;
-  return <EmbeddedCheckoutExperience cep={cep} shippingId={shipping} />;
+  const { cep = "", shipping = "", coupon = "" } = await searchParams;
+  return (
+    <EmbeddedCheckoutExperience
+      cep={cep}
+      shippingId={shipping}
+      couponCode={coupon}
+    />
+  );
 }
