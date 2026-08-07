@@ -6,31 +6,72 @@ on:
     paths:
       - ".github/workflows/activate-marketing.yml"
 
+permissions:
+  contents: write
+
 jobs:
   activate:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     env:
       SETUP_TOKEN: "4xQZ1p-hgGCpCLguXYjZP-bQ2RNaJ1Gu"
       SETUP_URL: "https://www.brinqueteando.online/api/_setup-marketing-7f3a9c"
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Wait for production
-        run: sleep 8
+        run: sleep 5
 
-      - name: Create templates 1-7
-        run: curl --fail-with-body --retry 2 --retry-delay 2 --silent --show-error "$SETUP_URL?token=$SETUP_TOKEN&phase=templates1"
+      - name: Execute activation phases
+        shell: bash
+        run: |
+          set +e
+          rm -rf marketing-activation
+          mkdir -p marketing-activation
 
-      - name: Create templates 8-14
-        run: curl --fail-with-body --retry 2 --retry-delay 2 --silent --show-error "$SETUP_URL?token=$SETUP_TOKEN&phase=templates2"
+          run_phase() {
+            phase="$1"
+            echo "Running $phase"
+            response=$(curl --retry 2 --retry-delay 2 --silent --show-error \
+              --write-out '\n%{http_code}' \
+              "$SETUP_URL?token=$SETUP_TOKEN&phase=$phase")
+            code=$(printf '%s\n' "$response" | tail -n 1)
+            body=$(printf '%s\n' "$response" | sed '$d')
+            printf '%s\n' "$body" > "marketing-activation/$phase.json"
+            printf '%s\n' "$code" > "marketing-activation/$phase.status"
+          }
 
-      - name: Create templates 15-21
-        run: curl --fail-with-body --retry 2 --retry-delay 2 --silent --show-error "$SETUP_URL?token=$SETUP_TOKEN&phase=templates3"
+          run_phase templates1
+          run_phase templates2
+          run_phase templates3
+          run_phase templates4
+          run_phase automations
+          run_phase stripe
 
-      - name: Create templates 22-25
-        run: curl --fail-with-body --retry 2 --retry-delay 2 --silent --show-error "$SETUP_URL?token=$SETUP_TOKEN&phase=templates4"
+          python - <<'PY'
+          import json
+          from pathlib import Path
 
-      - name: Create events and automations
-        run: curl --fail-with-body --retry 2 --retry-delay 2 --silent --show-error "$SETUP_URL?token=$SETUP_TOKEN&phase=automations"
+          root = Path('marketing-activation')
+          phases = ['templates1','templates2','templates3','templates4','automations','stripe']
+          report = {}
+          for phase in phases:
+              status = (root / f'{phase}.status').read_text().strip()
+              raw = (root / f'{phase}.json').read_text().strip()
+              try:
+                  body = json.loads(raw) if raw else None
+              except Exception:
+                  body = {'raw': raw}
+              report[phase] = {'http_status': status, 'response': body}
+          (root / 'report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
+          PY
 
-      - name: Create Stripe marketing webhook
-        run: curl --fail-with-body --retry 2 --retry-delay 2 --silent --show-error "$SETUP_URL?token=$SETUP_TOKEN&phase=stripe"
+      - name: Commit activation report
+        shell: bash
+        run: |
+          git config user.name "BrinqueTEAndo Automation"
+          git config user.email "actions@users.noreply.github.com"
+          git add marketing-activation/report.json
+          git commit -m "chore: registra resultado da ativação de marketing" || exit 0
+          git push
