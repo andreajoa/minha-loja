@@ -1,3 +1,4 @@
+import { createHash, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { Resend } from "resend";
@@ -14,7 +15,16 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const SETUP_TOKEN_HASH = "ac3ad57e5c63922a0d5f33b06c16506b7faf48e13cf493757c6bd6ce718acde6";
 const wait = (ms = 650) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function authorized(req: Request) {
+  const supplied = new URL(req.url).searchParams.get("token") || "";
+  const digest = createHash("sha256").update(supplied).digest("hex");
+  const expected = Buffer.from(SETUP_TOKEN_HASH, "hex");
+  const received = Buffer.from(digest, "hex");
+  return expected.length === received.length && timingSafeEqual(expected, received);
+}
 
 function api(resend: Resend) {
   return resend as unknown as {
@@ -228,6 +238,10 @@ async function ensureAutomation(resend: Resend, definition: any) {
 }
 
 export async function GET(req: Request) {
+  if (!authorized(req)) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
   try {
     const resendKey = process.env.RESEND_API_KEY?.trim();
     if (!resendKey) return NextResponse.json({ ok: false, error: "RESEND_API_KEY ausente" }, { status: 500 });
