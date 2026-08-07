@@ -12,7 +12,17 @@ export default function Privacidade() {
           content: (
             <>
               <p>Podemos tratar dados como nome, e-mail, WhatsApp, endereço de entrega, CEP, informações do pedido, histórico de atendimento e dados técnicos necessários ao funcionamento da loja.</p>
+              <p>Quando a medição de experiência é aceita, também podem ser registrados dados de jornada, como origem da visita, parâmetros de campanha, páginas visualizadas, interações com botões e links, produtos consultados, ações no carrinho e checkout, tempo ativo, profundidade de rolagem, dispositivo, navegador e localização geográfica aproximada fornecida pela infraestrutura de hospedagem.</p>
               <p>Os dados completos do cartão não são armazenados pela BrinqueTEAndo. O pagamento é processado pela Stripe em ambiente seguro.</p>
+            </>
+          ),
+        },
+        {
+          title: "Inteligência e melhoria da experiência",
+          content: (
+            <>
+              <p>A BrinqueTEAndo utiliza analytics first-party para compreender como visitantes chegam à loja, quais conteúdos e produtos despertam interesse, onde existem dificuldades na navegação e em quais etapas do funil ocorrem desistências.</p>
+              <p>As jornadas são relacionadas por identificadores aleatórios de visitante e sessão. As tabelas próprias de analytics não armazenam o endereço IP bruto e não utilizam fingerprint do dispositivo para identificar uma pessoa.</p>
             </>
           ),
         },
@@ -20,7 +30,7 @@ export default function Privacidade() {
           title: "Por que utilizamos esses dados",
           content: (
             <>
-              <p>Utilizamos os dados para preparar e entregar pedidos, confirmar pagamentos, prestar suporte, prevenir fraude, cumprir obrigações legais e manter a segurança do site.</p>
+              <p>Utilizamos os dados para preparar e entregar pedidos, confirmar pagamentos, prestar suporte, prevenir fraude, cumprir obrigações legais, manter a segurança do site e melhorar conteúdo, navegação, produtos e experiência de compra.</p>
               <p>Newsletter, promoções e cupons são enviados quando houver consentimento ou outra base legal aplicável, sempre com possibilidade de cancelamento.</p>
             </>
           ),
@@ -29,8 +39,8 @@ export default function Privacidade() {
           title: "Serviços que apoiam a operação",
           content: (
             <>
-              <p>Alguns dados podem ser tratados por fornecedores necessários à operação, como Stripe (pagamentos), Clerk (autenticação), Resend (e-mails), Vercel (hospedagem) e prestadores de logística ou cálculo de frete.</p>
-              <p>Compartilhamos somente o necessário para cada finalidade e não vendemos dados pessoais.</p>
+              <p>Alguns dados podem ser tratados por fornecedores necessários à operação, como Stripe (pagamentos), Clerk (autenticação), Resend (e-mails), Vercel (hospedagem), infraestrutura de banco de dados e prestadores de logística ou cálculo de frete.</p>
+              <p>Não vendemos dados pessoais. O acesso interno ao painel de inteligência é restrito à administração da loja.</p>
             </>
           ),
         },
@@ -38,7 +48,7 @@ export default function Privacidade() {
           title: "Armazenamento e segurança",
           content: (
             <>
-              <p>Adotamos medidas técnicas e organizacionais compatíveis com a operação da loja. Os dados são mantidos pelo tempo necessário para cumprir a finalidade informada, obrigações legais, prevenção de fraude e exercício regular de direitos.</p>
+              <p>Adotamos medidas técnicas e organizacionais compatíveis com a operação da loja. Os dados são mantidos pelo tempo necessário para cumprir a finalidade informada, obrigações legais, prevenção de fraude, análise operacional e exercício regular de direitos.</p>
             </>
           ),
         },
@@ -46,8 +56,8 @@ export default function Privacidade() {
           title: "Seus direitos",
           content: (
             <>
-              <p>Nos termos da LGPD, você pode solicitar confirmação de tratamento, acesso, correção, informações sobre compartilhamento, revogação do consentimento e, quando cabível, eliminação, anonimização, bloqueio ou portabilidade.</p>
-              <p>Para exercer esses direitos, escreva para <a className="font-bold text-secondary underline underline-offset-4" href="mailto:info@brinqueteando.online">info@brinqueteando.online</a>.</p>
+              <p>Você pode solicitar informações, acesso ou correção de dados relacionados ao atendimento e às operações da loja, além de exercer os demais direitos aplicáveis ao tratamento de dados pessoais.</p>
+              <p>Para solicitações de privacidade, escreva para <a className="font-bold text-secondary underline underline-offset-4" href="mailto:info@brinqueteando.online">info@brinqueteando.online</a>.</p>
             </>
           ),
         },
@@ -60,7 +70,7 @@ export default function Privacidade() {
           ),
         },
       ]}
-      note={<p>Esta política poderá ser atualizada para refletir mudanças legais, operacionais ou tecnológicas. A versão vigente ficará sempre disponível nesta página.</p>}
+      note={<p>Esta política poderá ser atualizada para refletir mudanças operacionais ou tecnológicas. A versão vigente ficará sempre disponível nesta página.</p>}
     />
   );
 }
