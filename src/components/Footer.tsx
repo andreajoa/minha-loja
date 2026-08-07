@@ -36,14 +36,16 @@ export default function Footer() {
         </div>
 
         <div>
-          <h3 className="font-display text-3xl">Navegar</h3>
+          <h3 className="font-display text-3xl">Informações</h3>
           <ul className="mt-5 space-y-2 text-sm text-text-light">
             <li><Link href="/sobre" className="hover:text-secondary">Nossa curadoria</Link></li>
             <li><Link href="/contato" className="hover:text-secondary">Contato</Link></li>
-            <li><Link href="/politicas/privacidade" className="hover:text-secondary">Privacidade</Link></li>
-            <li><Link href="/politicas/termos" className="hover:text-secondary">Termos de serviço</Link></li>
-            <li><Link href="/politicas/reembolso" className="hover:text-secondary">Trocas e reembolso</Link></li>
+            <li><Link href="/politicas/pagamento-seguranca" className="hover:text-secondary">Pagamento e segurança</Link></li>
             <li><Link href="/politicas/envio" className="hover:text-secondary">Envio e entrega</Link></li>
+            <li><Link href="/politicas/reembolso" className="hover:text-secondary">Trocas, devoluções e reembolso</Link></li>
+            <li><Link href="/politicas/termos" className="hover:text-secondary">Termos de uso e compra</Link></li>
+            <li><Link href="/politicas/privacidade" className="hover:text-secondary">Privacidade e LGPD</Link></li>
+            <li><Link href="/politicas/cookies" className="hover:text-secondary">Política de cookies</Link></li>
           </ul>
         </div>
 
