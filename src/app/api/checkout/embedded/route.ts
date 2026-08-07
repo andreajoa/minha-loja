@@ -66,6 +66,7 @@ export async function POST(req: Request) {
     const session = await stripe.checkout.sessions.create({
       ui_mode: "embedded_page",
       mode: "payment",
+      locale: "pt-BR",
       payment_method_types: ["card"],
       customer_creation: "always",
       saved_payment_method_options: { payment_method_save: "enabled" },
