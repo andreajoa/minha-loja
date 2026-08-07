@@ -33,12 +33,24 @@ export async function POST(req: Request) {
     if (!email) return NextResponse.json({ received: true });
 
     const resend = new Resend(resendKey);
-    const result = await resend.events.send({
-      event: "order.completed",
-      email,
-      payload: { orderId: session.id },
-    });
-    if (result.error) console.error("order.completed event:", result.error);
+    const events = [
+      { event: "cart.recovery_stop", payload: { reason: "order_completed" } },
+      { event: "checkout.recovery_stop", payload: { reason: "order_completed" } },
+      { event: "order.completed", payload: { orderId: session.id } },
+    ] as const;
+
+    for (const item of events) {
+      try {
+        const result = await resend.events.send({
+          event: item.event,
+          email,
+          payload: item.payload,
+        });
+        if (result.error) console.error(`${item.event} event:`, result.error);
+      } catch (eventError) {
+        console.error(`${item.event} exception:`, eventError);
+      }
+    }
 
     return NextResponse.json({ received: true });
   } catch (error) {
