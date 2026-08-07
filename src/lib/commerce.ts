@@ -1,4 +1,10 @@
 import { products, type Product } from "@/data/products";
+import {
+  isNewsletterCoupon,
+  NEWSLETTER_COUPON_CODE,
+  NEWSLETTER_COUPON_PERCENT,
+  normalizeCouponCode,
+} from "@/lib/coupons";
 
 export type CartLine = {
   id: string;
@@ -10,6 +16,8 @@ export type DiscountTier = {
   percent: number;
   label: string;
 };
+
+export type DiscountSource = "progressive" | "coupon" | "none";
 
 export const DISCOUNT_TIERS: DiscountTier[] = [
   { minimum: 0, percent: 0, label: "Preço normal" },
@@ -55,22 +63,44 @@ export function getCartSubtotal(lines: CartLine[]) {
 }
 
 export function getDiscountTier(subtotal: number) {
-  return [...DISCOUNT_TIERS]
-    .reverse()
-    .find((tier) => subtotal >= tier.minimum) || DISCOUNT_TIERS[0];
+  return (
+    [...DISCOUNT_TIERS]
+      .reverse()
+      .find((tier) => subtotal >= tier.minimum) || DISCOUNT_TIERS[0]
+  );
 }
 
 export function getNextDiscountTier(subtotal: number) {
   return DISCOUNT_TIERS.find((tier) => tier.minimum > subtotal) || null;
 }
 
-export function calculateDiscount(subtotal: number) {
-  const tier = getDiscountTier(subtotal);
+export function calculateDiscount(subtotal: number, couponCode?: string | null) {
+  const progressiveTier = getDiscountTier(subtotal);
+  const normalizedCoupon = normalizeCouponCode(couponCode);
+  const couponValid = isNewsletterCoupon(normalizedCoupon);
+  const couponApplied =
+    couponValid && NEWSLETTER_COUPON_PERCENT >= progressiveTier.percent;
+  const tier: DiscountTier = couponApplied
+    ? {
+        minimum: 0,
+        percent: NEWSLETTER_COUPON_PERCENT,
+        label: `Cupom ${NEWSLETTER_COUPON_CODE}`,
+      }
+    : progressiveTier;
   const amount = Math.round((subtotal * tier.percent) / 100);
+  const source: DiscountSource =
+    tier.percent === 0 ? "none" : couponApplied ? "coupon" : "progressive";
+
   return {
     tier,
     amount,
     totalAfterDiscount: Math.max(0, subtotal - amount),
+    source,
+    coupon: {
+      code: normalizedCoupon,
+      valid: couponValid,
+      applied: couponApplied,
+    },
   };
 }
 
@@ -117,24 +147,32 @@ export function formatMoney(amount: number) {
 }
 
 function notInCart(cartIds: Set<string>) {
-  return products.filter((product) => product.stock > 0 && !cartIds.has(product.id));
+  return products.filter(
+    (product) => product.stock > 0 && !cartIds.has(product.id),
+  );
 }
 
 export function getOrderBump(lines: CartLine[]) {
   const cartIds = new Set(lines.map((line) => line.id));
-  return notInCart(cartIds)
-    .filter((product) => product.price <= 7_000)
-    .sort((a, b) => a.price - b.price)[0] || null;
+  return (
+    notInCart(cartIds)
+      .filter((product) => product.price <= 7_000)
+      .sort((a, b) => a.price - b.price)[0] || null
+  );
 }
 
 export function getUpsell(lines: CartLine[]) {
   const normalized = normalizeCart(lines);
   const cartIds = new Set(normalized.map((line) => line.product.id));
-  const highestPrice = Math.max(...normalized.map((line) => line.product.price));
+  const highestPrice = Math.max(
+    ...normalized.map((line) => line.product.price),
+  );
 
-  return notInCart(cartIds)
-    .filter((product) => product.price > highestPrice)
-    .sort((a, b) => a.price - b.price)[0] || null;
+  return (
+    notInCart(cartIds)
+      .filter((product) => product.price > highestPrice)
+      .sort((a, b) => a.price - b.price)[0] || null
+  );
 }
 
 export function getDownsell(lines: CartLine[]) {
@@ -145,7 +183,9 @@ export function getDownsell(lines: CartLine[]) {
 export function getCrossSell(lines: CartLine[], limit = 3) {
   const normalized = normalizeCart(lines);
   const cartIds = new Set(normalized.map((line) => line.product.id));
-  const cartCategories = new Set(normalized.map((line) => line.product.category));
+  const cartCategories = new Set(
+    normalized.map((line) => line.product.category),
+  );
 
   return notInCart(cartIds)
     .sort((a, b) => {
@@ -157,7 +197,10 @@ export function getCrossSell(lines: CartLine[], limit = 3) {
     .slice(0, limit);
 }
 
-export function getPostPurchaseRecommendations(purchasedIds: string[], limit = 4) {
+export function getPostPurchaseRecommendations(
+  purchasedIds: string[],
+  limit = 4,
+) {
   const purchased = new Set(purchasedIds);
   return products
     .filter((product) => product.stock > 0 && !purchased.has(product.id))
@@ -175,11 +218,23 @@ export function getPackageMetrics(lines: CartLine[]) {
     (total, product) => total + product.shipping.weightGrams,
     0,
   );
-  const lengthCm = Math.max(16, ...quantityExpanded.map((product) => product.shipping.lengthCm));
-  const widthCm = Math.max(11, ...quantityExpanded.map((product) => product.shipping.widthCm));
+  const lengthCm = Math.max(
+    16,
+    ...quantityExpanded.map((product) => product.shipping.lengthCm),
+  );
+  const widthCm = Math.max(
+    11,
+    ...quantityExpanded.map((product) => product.shipping.widthCm),
+  );
   const heightCm = Math.min(
     100,
-    Math.max(2, quantityExpanded.reduce((total, product) => total + product.shipping.heightCm, 0)),
+    Math.max(
+      2,
+      quantityExpanded.reduce(
+        (total, product) => total + product.shipping.heightCm,
+        0,
+      ),
+    ),
   );
 
   return {
