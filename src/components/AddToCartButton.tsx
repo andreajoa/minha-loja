@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useCart } from "@/components/CartProvider";
-import { trackAnalytics } from "@/lib/analytics-client";
 import { products } from "@/data/products";
 
 export default function AddToCartButton({
@@ -20,13 +19,6 @@ export default function AddToCartButton({
 
   function handleAdd() {
     addItem(productId);
-    trackAnalytics("add_to_cart", {
-      productId,
-      productName: product?.name || "",
-      valueCents: product?.price || 0,
-      quantity: 1,
-      properties: { location: window.location.pathname },
-    });
     setAdded(true);
     window.setTimeout(() => setAdded(false), 1600);
   }
