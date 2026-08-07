@@ -30,14 +30,14 @@ function ProductArtwork({ product, className = "" }: { product: Product; classNa
 
 function QuoteBrushSection() {
   return (
-    <section className="relative overflow-hidden bg-background px-5 py-20 sm:py-28">
-      <div className="relative mx-auto flex min-h-[310px] max-w-6xl items-center justify-center text-center">
-        <div className="absolute inset-x-[5%] top-[12%] h-[28%] -rotate-2 rounded-[45%_55%_42%_58%] bg-[#b7aaa2]/52 blur-[0.2px]" />
-        <div className="absolute inset-x-[13%] top-[38%] h-[23%] rotate-1 rounded-[50%_45%_58%_42%] bg-[#b7aaa2]/48" />
-        <div className="absolute inset-x-[9%] bottom-[11%] h-[28%] -rotate-1 rounded-[42%_58%_48%_52%] bg-[#b7aaa2]/46" />
-        <div className="absolute left-[22%] top-[5%] h-[90%] w-[58%] bg-[radial-gradient(ellipse_at_center,rgba(183,170,162,0.28),transparent_70%)]" />
+    <section className="relative overflow-hidden bg-background px-4 py-14 sm:px-5 sm:py-28">
+      <div className="relative mx-auto flex min-h-[230px] max-w-6xl items-center justify-center text-center sm:min-h-[310px]">
+        <div className="absolute inset-x-[3%] top-[12%] h-[28%] -rotate-2 rounded-[45%_55%_42%_58%] bg-[#b7aaa2]/52 blur-[0.2px] sm:inset-x-[5%]" />
+        <div className="absolute inset-x-[8%] top-[38%] h-[23%] rotate-1 rounded-[50%_45%_58%_42%] bg-[#b7aaa2]/48 sm:inset-x-[13%]" />
+        <div className="absolute inset-x-[5%] bottom-[11%] h-[28%] -rotate-1 rounded-[42%_58%_48%_52%] bg-[#b7aaa2]/46 sm:inset-x-[9%]" />
+        <div className="absolute left-[15%] top-[5%] h-[90%] w-[70%] bg-[radial-gradient(ellipse_at_center,rgba(183,170,162,0.28),transparent_70%)] sm:left-[22%] sm:w-[58%]" />
 
-        <blockquote className="relative z-10 max-w-4xl font-display text-3xl italic leading-[1.35] text-primary sm:text-4xl lg:text-5xl">
+        <blockquote className="relative z-10 max-w-4xl px-2 font-display text-2xl italic leading-[1.35] text-primary sm:text-4xl lg:text-5xl">
           Cada brinquedo é escolhido com foco no desenvolvimento, na funcionalidade e no brincar com intenção.
         </blockquote>
       </div>
@@ -65,16 +65,24 @@ function FeaturedPurchaseSection() {
   }
 
   return (
-    <section className="bg-background-alt px-4 py-16 sm:px-6 sm:py-24">
-      <div className="mx-auto grid max-w-[1440px] overflow-hidden rounded-[2rem] border border-border/45 bg-white shadow-[0_30px_90px_rgba(9,38,71,0.10)] lg:grid-cols-[1.08fr_0.92fr]">
-        <div className="relative min-h-[520px] border-b border-border/35 bg-[#eee6df] p-4 sm:p-6 lg:border-b-0 lg:border-r">
-          <div className="absolute bottom-7 right-6 top-7 z-10 flex w-20 flex-col gap-3 sm:w-24">
+    <section className="bg-background-alt px-3 py-12 sm:px-6 sm:py-24">
+      <div className="mx-auto grid max-w-[1440px] overflow-hidden rounded-[1.5rem] border border-border/45 bg-white shadow-[0_30px_90px_rgba(9,38,71,0.10)] sm:rounded-[2rem] lg:grid-cols-[1.08fr_0.92fr]">
+        <div className="border-b border-border/35 bg-[#eee6df] p-3 sm:p-6 lg:border-b-0 lg:border-r">
+          <div className="relative aspect-square overflow-hidden rounded-[1.25rem] bg-[radial-gradient(circle_at_50%_38%,rgba(255,255,255,0.88),transparent_44%),linear-gradient(145deg,#e8ddd4,#f8f4f0_58%,#e5d6cb)] sm:rounded-[1.5rem]">
+            <img
+              src={previewImage}
+              alt={featured.name}
+              className="h-full w-full object-contain p-5 sm:p-10 lg:p-12"
+            />
+          </div>
+
+          <div className="mt-3 grid grid-cols-4 gap-2 sm:mt-4 sm:gap-3">
             {productImages.map((image, index) => (
               <button
                 key={`${image}-${index}`}
                 type="button"
                 onClick={() => setPreviewImage(image)}
-                className={`aspect-square overflow-hidden rounded-xl border-2 bg-white p-1.5 shadow-md transition hover:-translate-y-0.5 ${
+                className={`aspect-square min-w-0 overflow-hidden rounded-xl border-2 bg-white p-1 shadow-md transition hover:-translate-y-0.5 ${
                   previewImage === image ? "border-secondary" : "border-white"
                 }`}
                 aria-label={`Visualizar imagem ${index + 1} de ${featured.name}`}
@@ -83,29 +91,25 @@ function FeaturedPurchaseSection() {
               </button>
             ))}
           </div>
-
-          <div className="absolute inset-4 right-28 overflow-hidden rounded-[1.5rem] bg-[radial-gradient(circle_at_50%_38%,rgba(255,255,255,0.88),transparent_44%),linear-gradient(145deg,#e8ddd4,#f8f4f0_58%,#e5d6cb)] sm:inset-6 sm:right-36">
-            <img src={previewImage} alt={featured.name} className="h-full w-full object-contain p-8 sm:p-12" />
-          </div>
         </div>
 
-        <div className="flex flex-col justify-center p-7 sm:p-12 lg:p-14">
-          <div className="flex flex-wrap items-start justify-between gap-5">
-            <span className="inline-flex items-center gap-2 rounded-md bg-secondary px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-white">
+        <div className="flex min-w-0 flex-col justify-center p-5 sm:p-10 lg:p-14">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-5">
+            <span className="inline-flex w-fit items-center gap-2 rounded-md bg-secondary px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-white">
               <span aria-hidden="true">★</span> Destaque
             </span>
-            <div className="text-right text-primary">
+            <div className="text-left text-primary sm:text-right">
               <div className="tracking-[0.16em]" aria-label="Produto selecionado pela curadoria">★★★★★</div>
               <p className="mt-1 text-xs text-text-light">Seleção da curadoria</p>
             </div>
           </div>
 
-          <p className="mt-7 text-sm font-bold uppercase tracking-[0.16em] text-muted">{featured.category}</p>
-          <h2 className="mt-2 font-display text-4xl leading-none text-primary sm:text-5xl">{featured.name}</h2>
-          <p className="mt-5 font-display text-4xl text-secondary">{formatPrice(featured.price)}</p>
-          <p className="mt-5 leading-7 text-text-light">{featured.description}</p>
+          <p className="mt-6 text-xs font-bold uppercase tracking-[0.16em] text-muted sm:mt-7 sm:text-sm">{featured.category}</p>
+          <h2 className="mt-2 font-display text-4xl leading-[0.98] text-primary sm:text-5xl">{featured.name}</h2>
+          <p className="mt-4 font-display text-4xl text-secondary sm:mt-5">{formatPrice(featured.price)}</p>
+          <p className="mt-4 leading-7 text-text-light sm:mt-5">{featured.description}</p>
 
-          <div className="mt-7">
+          <div className="mt-6 sm:mt-7">
             <p className="text-xs font-black uppercase tracking-[0.15em] text-text-light">O que este recurso pode apoiar</p>
             <div className="mt-3 flex flex-wrap gap-2">
               {featured.benefits.slice(0, 3).map((benefit, index) => (
@@ -116,9 +120,9 @@ function FeaturedPurchaseSection() {
             </div>
           </div>
 
-          <div className="mt-7 flex flex-wrap gap-2">
-            <span className="rounded-md bg-primary px-5 py-3 text-xs font-black uppercase tracking-[0.12em] text-white">● Em estoque</span>
-            <span className="rounded-md bg-background-alt px-5 py-3 text-xs font-black uppercase tracking-[0.12em] text-secondary">Escolha orientada</span>
+          <div className="mt-6 flex flex-wrap gap-2 sm:mt-7">
+            <span className="rounded-md bg-primary px-4 py-3 text-[10px] font-black uppercase tracking-[0.12em] text-white sm:px-5 sm:text-xs">● Em estoque</span>
+            <span className="rounded-md bg-background-alt px-4 py-3 text-[10px] font-black uppercase tracking-[0.12em] text-secondary sm:px-5 sm:text-xs">Escolha orientada</span>
           </div>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-[170px_1fr]">
@@ -127,15 +131,15 @@ function FeaturedPurchaseSection() {
               <span className="flex items-center justify-center border-x border-border/55 text-lg text-primary">{quantity}</span>
               <button type="button" onClick={() => setQuantity((value) => Math.min(10, value + 1))} className="text-xl text-secondary hover:bg-background-alt" aria-label="Aumentar quantidade">+</button>
             </div>
-            <button type="button" onClick={() => addToCart(false)} disabled={featured.stock <= 0} className="button-shimmer min-h-14 rounded-md bg-secondary px-6 text-sm font-black uppercase tracking-[0.11em] text-white transition hover:bg-primary disabled:opacity-50">
+            <button type="button" onClick={() => addToCart(false)} disabled={featured.stock <= 0} className="button-shimmer min-h-14 rounded-md bg-secondary px-5 text-sm font-black uppercase tracking-[0.11em] text-white transition hover:bg-primary disabled:opacity-50">
               {featured.stock <= 0 ? "Produto esgotado" : added ? "Adicionado ao carrinho" : "Adicionar ao carrinho"}
             </button>
           </div>
 
-          <button type="button" onClick={() => addToCart(true)} disabled={featured.stock <= 0} className="mt-3 min-h-14 rounded-md bg-primary px-6 text-sm font-black uppercase tracking-[0.12em] text-white transition hover:bg-secondary disabled:opacity-50">
+          <button type="button" onClick={() => addToCart(true)} disabled={featured.stock <= 0} className="mt-3 min-h-14 rounded-md bg-primary px-5 text-sm font-black uppercase tracking-[0.12em] text-white transition hover:bg-secondary disabled:opacity-50">
             Comprar agora
           </button>
-          <Link href={`/produto/${featured.id}`} className="mt-3 inline-flex min-h-14 items-center justify-center rounded-md border border-secondary/55 text-sm font-black uppercase tracking-[0.12em] text-primary transition hover:bg-background-alt">
+          <Link href={`/produto/${featured.id}`} className="mt-3 inline-flex min-h-14 items-center justify-center rounded-md border border-secondary/55 px-4 text-center text-sm font-black uppercase tracking-[0.12em] text-primary transition hover:bg-background-alt">
             Ver detalhes
           </Link>
         </div>
@@ -153,21 +157,21 @@ function CategoryFramesSection() {
   ] as const;
 
   return (
-    <section className="overflow-hidden bg-background px-5 py-20 sm:py-28">
+    <section className="overflow-hidden bg-background px-4 py-14 sm:px-5 sm:py-28">
       <div className="mx-auto max-w-7xl">
         <div className="text-center">
           <p className="text-xs font-black uppercase tracking-[0.22em] text-secondary">Encontre pelo objetivo</p>
-          <h2 className="mt-3 font-display text-4xl text-primary sm:text-5xl">Explore as categorias</h2>
+          <h2 className="mt-3 font-display text-4xl leading-none text-primary sm:text-5xl">Explore as categorias</h2>
         </div>
 
-        <div className="mx-auto mt-14 grid max-w-6xl gap-x-5 gap-y-16 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mx-auto mt-12 grid max-w-6xl gap-x-5 gap-y-14 sm:mt-14 sm:grid-cols-2 sm:gap-y-16 lg:grid-cols-4">
           {definitions.map((item) => (
-            <Link key={item.label} href={`/colecoes?categoria=${encodeURIComponent(item.category)}`} className="group relative block pt-20">
-              <div className="relative min-h-[250px] overflow-visible rounded-2xl bg-[#3a2a22] px-5 pb-8 pt-32 text-center shadow-[0_24px_55px_rgba(9,38,71,0.12)] transition duration-300 group-hover:-translate-y-2 group-hover:bg-secondary">
-                <div className="absolute -top-24 left-1/2 h-56 w-[88%] -translate-x-1/2 overflow-hidden rounded-[1.7rem] border-8 border-background bg-white shadow-xl transition duration-500 group-hover:-translate-y-3 group-hover:scale-105">
-                  <img src={item.image} alt="" className="h-full w-full object-cover" />
+            <Link key={item.label} href={`/colecoes?categoria=${encodeURIComponent(item.category)}`} className="group relative block pt-16 sm:pt-20">
+              <div className="relative min-h-[220px] overflow-visible rounded-2xl bg-[#3a2a22] px-4 pb-7 pt-28 text-center shadow-[0_24px_55px_rgba(9,38,71,0.12)] transition duration-300 group-hover:-translate-y-2 group-hover:bg-secondary sm:min-h-[250px] sm:px-5 sm:pb-8 sm:pt-32">
+                <div className="absolute -top-20 left-1/2 h-48 w-[90%] -translate-x-1/2 overflow-hidden rounded-[1.5rem] border-6 border-background bg-white shadow-xl transition duration-500 group-hover:-translate-y-2 group-hover:scale-[1.02] sm:-top-24 sm:h-56 sm:w-[88%] sm:rounded-[1.7rem] sm:border-8">
+                  <img src={item.image} alt={`Categoria ${item.label}`} className="h-full w-full object-cover" />
                 </div>
-                <h3 className="font-display text-4xl text-white">{item.label}</h3>
+                <h3 className="font-display text-3xl text-white sm:text-4xl">{item.label}</h3>
                 <p className="mt-3 text-xs font-bold uppercase tracking-[0.15em] text-white/65">Ver produtos</p>
               </div>
             </Link>
@@ -190,7 +194,7 @@ export default function HomeReferenceSections() {
 
 export function InstagramFollowStrip() {
   return (
-    <section className="bg-background py-6 sm:py-10">
+    <section className="bg-background py-4 sm:py-10">
       <a
         href="https://www.instagram.com/neuromargarethapoio/"
         target="_blank"
@@ -201,7 +205,7 @@ export function InstagramFollowStrip() {
         <img
           src={`${basePath}/home-sections/03-siga-no-instagram.png`}
           alt="Cenas de infância, brinquedos e aprendizagem. Siga @neuromargarethapoio no Instagram."
-          className="aspect-[3/1] w-full object-cover transition duration-700 group-hover:scale-[1.015]"
+          className="aspect-[4/3] w-full object-cover object-center transition duration-700 group-hover:scale-[1.015] sm:aspect-[3/1]"
           loading="lazy"
         />
         <span className="absolute inset-0 bg-primary/5 transition group-hover:bg-primary/0" />
