@@ -83,6 +83,7 @@ async function ensureEvents(resend: Resend) {
         cartTotal: "string",
       },
     },
+    { name: "cart.recovery_stop", schema: { reason: "string" } },
     {
       name: "checkout.recovery_started",
       schema: {
@@ -93,6 +94,7 @@ async function ensureEvents(resend: Resend) {
         cartTotal: "string",
       },
     },
+    { name: "checkout.recovery_stop", schema: { reason: "string" } },
     { name: "order.completed", schema: { orderId: "string" } },
   ];
 
@@ -145,6 +147,7 @@ function newsletterAutomation(templateIds: string[]) {
 function recoveryAutomation(
   name: string,
   triggerEvent: string,
+  stopEvent: string,
   templateIds: string[],
   waits: string[],
 ) {
@@ -160,7 +163,7 @@ function recoveryAutomation(
     steps.push({
       key: wait,
       type: "wait_for_event",
-      config: { eventName: "order.completed", timeout: waits[i] },
+      config: { eventName: stopEvent, timeout: waits[i] },
     });
     steps.push({
       key: send,
@@ -251,6 +254,7 @@ export async function GET(req: Request) {
           recoveryAutomation(
             "BrinqueTEAndo - Carrinho abandonado 5 emails",
             "cart.recovery_started",
+            "cart.recovery_stop",
             cartIds,
             ["1 hour", "7 hours", "16 hours", "1 day", "1 day"],
           ),
@@ -260,6 +264,7 @@ export async function GET(req: Request) {
           recoveryAutomation(
             "BrinqueTEAndo - Checkout abandonado 5 emails",
             "checkout.recovery_started",
+            "checkout.recovery_stop",
             checkoutIds,
             ["45 minutes", "3 hours", "8 hours", "1 day", "2 days"],
           ),
