@@ -65,7 +65,9 @@ export default function Footer() {
           <h3 className="mt-4 font-display text-3xl">Precisa de ajuda?</h3>
           <p className="mt-5 text-sm leading-6 text-text-light">
             Atendimento de segunda a sexta, das 9h às 18h.<br />
-            contato@brinqueteando.com.br
+            <a href="mailto:info@brinqueteando.online" className="hover:text-secondary">
+              info@brinqueteando.online
+            </a>
           </p>
           <p className="mt-6 text-sm leading-6 text-text-light">
             Curadoria de <strong className="text-primary">Margareth Almeida</strong><br />
