@@ -30,7 +30,7 @@ export default function ProductPurchasePanel({ productId }: { productId: string 
 
   function addSelected() {
     if (stock <= 0) return;
-    addItem(product.id, 1, activeVariantId);
+    addItem(productId, 1, activeVariantId);
     setAdded(true);
     window.setTimeout(() => setAdded(false), 1600);
   }
