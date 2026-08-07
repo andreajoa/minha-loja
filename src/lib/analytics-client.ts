@@ -34,6 +34,10 @@ function uuid() {
   }
 }
 
+function setIdCookie(name: string, value: string, maxAge: number) {
+  document.cookie = `${name}=${encodeURIComponent(value)}; Path=/; Max-Age=${maxAge}; SameSite=Lax; Secure`;
+}
+
 export function analyticsConsentGranted() {
   if (typeof window === "undefined") return false;
   return window.localStorage.getItem("cookie-consent") === "true";
@@ -45,6 +49,7 @@ function getVisitorId() {
     id = uuid();
     window.localStorage.setItem(VISITOR_KEY, id);
   }
+  setIdCookie("bt_analytics_visitor", id, 60 * 60 * 24 * 365);
   return id;
 }
 
@@ -71,6 +76,7 @@ function getSessionState(): SessionState {
   }
 
   window.localStorage.setItem(SESSION_KEY, JSON.stringify(current));
+  setIdCookie("bt_analytics_session", current.id, 60 * 30);
   return current;
 }
 
