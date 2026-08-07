@@ -1,0 +1,36 @@
+name: Activate BrinqueTEAndo marketing
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/activate-marketing.yml"
+
+jobs:
+  activate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SETUP_TOKEN: "4xQZ1p-hgGCpCLguXYjZP-bQ2RNaJ1Gu"
+      SETUP_URL: "https://www.brinqueteando.online/api/_setup-marketing-7f3a9c"
+    steps:
+      - name: Wait for production
+        run: sleep 8
+
+      - name: Create templates 1-7
+        run: curl --fail-with-body --retry 2 --retry-delay 2 --silent --show-error "$SETUP_URL?token=$SETUP_TOKEN&phase=templates1"
+
+      - name: Create templates 8-14
+        run: curl --fail-with-body --retry 2 --retry-delay 2 --silent --show-error "$SETUP_URL?token=$SETUP_TOKEN&phase=templates2"
+
+      - name: Create templates 15-21
+        run: curl --fail-with-body --retry 2 --retry-delay 2 --silent --show-error "$SETUP_URL?token=$SETUP_TOKEN&phase=templates3"
+
+      - name: Create templates 22-25
+        run: curl --fail-with-body --retry 2 --retry-delay 2 --silent --show-error "$SETUP_URL?token=$SETUP_TOKEN&phase=templates4"
+
+      - name: Create events and automations
+        run: curl --fail-with-body --retry 2 --retry-delay 2 --silent --show-error "$SETUP_URL?token=$SETUP_TOKEN&phase=automations"
+
+      - name: Create Stripe marketing webhook
+        run: curl --fail-with-body --retry 2 --retry-delay 2 --silent --show-error "$SETUP_URL?token=$SETUP_TOKEN&phase=stripe"
