@@ -3,10 +3,17 @@ import AddToCartButton from "@/components/AddToCartButton";
 import { formatPrice, type Product } from "@/data/products";
 
 export default function ProductCard({ product }: { product: Product }) {
+  const analyticsProps = {
+    "data-analytics-action": "product_open",
+    "data-analytics-product-id": product.id,
+    "data-analytics-product-name": product.name,
+  } as const;
+
   return (
     <article className="brand-card group flex h-full min-w-0 flex-col overflow-hidden rounded-[1.5rem] border border-border/50 bg-white sm:rounded-[2rem]">
       <Link
         href={`/produto/${product.id}`}
+        {...analyticsProps}
         className="relative block aspect-square overflow-hidden bg-background-alt"
       >
         <div className="absolute -right-10 -top-10 z-10 h-28 w-28 rounded-full border border-secondary-light/30" />
@@ -32,7 +39,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
       <div className="flex min-w-0 flex-1 flex-col p-5 sm:p-6">
         <p className="text-[10px] font-black uppercase tracking-[0.16em] text-muted">{product.ageRange}</p>
-        <Link href={`/produto/${product.id}`}>
+        <Link href={`/produto/${product.id}`} {...analyticsProps}>
           <h3 className="mt-2 font-display text-2xl leading-[1.02] text-primary transition group-hover:text-secondary sm:text-3xl">{product.name}</h3>
         </Link>
         <p className="mt-3 line-clamp-3 text-sm leading-6 text-text-light sm:mt-4">{product.description}</p>
