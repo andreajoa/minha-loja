@@ -50,7 +50,10 @@ export async function POST(req: Request) {
       shippingQuote.options[0];
 
     if (!shipping) {
-      return NextResponse.json({ error: "Nenhuma opção de entrega está disponível." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Nenhuma opção de entrega está disponível." },
+        { status: 400 },
+      );
     }
 
     const requestUrl = new URL(req.url);
@@ -68,7 +71,44 @@ export async function POST(req: Request) {
       saved_payment_method_options: { payment_method_save: "enabled" },
       billing_address_collection: "required",
       shipping_address_collection: { allowed_countries: ["BR"] },
-      phone_number_collection: { enabled: true },
+      custom_fields: [
+        {
+          key: "whatsapp",
+          label: {
+            type: "custom",
+            custom: "WhatsApp com DDD",
+          },
+          type: "text",
+          optional: false,
+          text: {
+            minimum_length: 10,
+            maximum_length: 20,
+          },
+        },
+        {
+          key: "referencia",
+          label: {
+            type: "custom",
+            custom: "Bairro, complemento e referência",
+          },
+          type: "text",
+          optional: false,
+          text: {
+            minimum_length: 2,
+            maximum_length: 160,
+          },
+        },
+      ],
+      custom_text: {
+        shipping_address: {
+          message:
+            "Informe o endereço completo e correto. Use o campo adicional para bairro, complemento e ponto de referência.",
+        },
+        submit: {
+          message:
+            "Revise o endereço, o WhatsApp e os dados do pedido antes de concluir o pagamento.",
+        },
+      },
       line_items: normalizedCart.map(({ product, quantity }) => {
         const discountedUnitAmount = applyPercentDiscount(
           product.price,
@@ -155,7 +195,8 @@ export async function POST(req: Request) {
       },
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Erro ao iniciar o pagamento.";
+    const message =
+      error instanceof Error ? error.message : "Erro ao iniciar o pagamento.";
     const clientError =
       message.includes("inválid") ||
       message.includes("Estoque") ||
@@ -163,6 +204,9 @@ export async function POST(req: Request) {
       message.includes("CEP") ||
       message.includes("frete") ||
       message.includes("entrega");
-    return NextResponse.json({ error: message }, { status: clientError ? 400 : 500 });
+    return NextResponse.json(
+      { error: message },
+      { status: clientError ? 400 : 500 },
+    );
   }
 }
