@@ -48,9 +48,15 @@ export default function PolicyPage({ eyebrow, title, intro, sections, note }: Pr
         </article>
 
         <aside className="h-fit rounded-[1.7rem] border border-border/50 bg-primary p-6 text-white shadow-[0_18px_50px_rgba(9,38,71,0.12)] lg:sticky lg:top-36">
-          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-secondary-light">Precisa falar com a loja?</p>
-          <h2 className="mt-3 font-display text-3xl">Atendimento humanizado</h2>
-          <p className="mt-4 text-sm leading-6 text-white/75">Dúvidas sobre pedido, entrega, pagamento, privacidade, troca ou reembolso podem ser enviadas diretamente para nossa equipe.</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-secondary-light">Identificação da loja</p>
+          <h2 className="mt-3 font-display text-3xl">BrinqueTEAndo</h2>
+          <p className="mt-3 text-sm leading-6 text-white/78">
+            Proprietária e responsável pela curadoria: <strong className="text-white">Margareth Almeida</strong>, Neuropsicopedagoga.
+          </p>
+          <div className="mt-6 border-t border-white/15 pt-5">
+            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-secondary-light">Atendimento</p>
+            <p className="mt-3 text-sm leading-6 text-white/75">Dúvidas sobre pedido, entrega, pagamento, privacidade, troca ou reembolso podem ser enviadas diretamente para a loja.</p>
+          </div>
           <a href="mailto:info@brinqueteando.online" className="mt-6 flex min-h-12 items-center justify-center rounded-full bg-secondary px-5 text-center text-sm font-black text-white transition hover:bg-white hover:text-primary">info@brinqueteando.online</a>
           <p className="mt-4 text-xs leading-5 text-white/60">Atendimento de segunda a sexta, das 9h às 18h.</p>
           <div className="mt-6 border-t border-white/15 pt-5">
