@@ -16,6 +16,7 @@ type Payload = {
   cart?: CartLine[];
   cep?: unknown;
   shippingId?: unknown;
+  couponCode?: unknown;
 };
 
 export async function POST(req: Request) {
@@ -41,7 +42,9 @@ export async function POST(req: Request) {
       (total, line) => total + line.product.price * line.quantity,
       0,
     );
-    const discount = calculateDiscount(subtotal);
+    const couponCode =
+      typeof payload.couponCode === "string" ? payload.couponCode : "";
+    const discount = calculateDiscount(subtotal, couponCode);
     const shippingQuote = await quoteShipping(payload.cep, payload.cart);
     const requestedShippingId =
       typeof payload.shippingId === "string" ? payload.shippingId : "";
@@ -62,6 +65,12 @@ export async function POST(req: Request) {
     ).replace(/\/$/, "");
     const stripe = new Stripe(stripeSecretKey);
     const cartMetadata = serializeCart(payload.cart);
+    const discountDescription =
+      discount.source === "coupon"
+        ? `Cupom ${discount.coupon.code} de ${discount.tier.percent}% aplicado.`
+        : discount.source === "progressive"
+          ? `Desconto progressivo de ${discount.tier.percent}% aplicado.`
+          : "";
 
     const session = await stripe.checkout.sessions.create({
       ui_mode: "embedded_page",
@@ -120,10 +129,9 @@ export async function POST(req: Request) {
             currency: "brl",
             product_data: {
               name: product.name,
-              description:
-                discount.tier.percent > 0
-                  ? `${product.description} Desconto progressivo de ${discount.tier.percent}% aplicado.`
-                  : product.description,
+              description: discountDescription
+                ? `${product.description} ${discountDescription}`
+                : product.description,
               metadata: {
                 productId: product.id,
                 originalUnitAmount: String(product.price),
@@ -159,6 +167,9 @@ export async function POST(req: Request) {
         cart: cartMetadata,
         discountPercent: String(discount.tier.percent),
         discountAmount: String(discount.amount),
+        discountSource: discount.source,
+        couponCode: discount.coupon.valid ? discount.coupon.code : "",
+        couponApplied: String(discount.coupon.applied),
         shippingId: shipping.id,
         shippingAmount: String(shipping.amount),
         shippingLabel: shipping.label.slice(0, 200),
@@ -172,6 +183,8 @@ export async function POST(req: Request) {
           store: "brinqueteando",
           cart: cartMetadata,
           discountPercent: String(discount.tier.percent),
+          discountSource: discount.source,
+          couponCode: discount.coupon.valid ? discount.coupon.code : "",
           shippingId: shipping.id,
         },
       },
@@ -191,6 +204,9 @@ export async function POST(req: Request) {
         subtotal,
         discountPercent: discount.tier.percent,
         discountAmount: discount.amount,
+        discountSource: discount.source,
+        couponCode: discount.coupon.valid ? discount.coupon.code : "",
+        couponApplied: discount.coupon.applied,
         shippingAmount: shipping.amount,
         shippingLabel: shipping.label,
       },
