@@ -1,5 +1,6 @@
 name: Activate BrinqueTEAndo marketing public route
 
+# Reexecução após confirmação do deployment de produção.
 on:
   push:
     branches: [main]
