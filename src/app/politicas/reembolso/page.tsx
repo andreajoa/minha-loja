@@ -58,7 +58,7 @@ export default function Reembolso() {
           ),
         },
       ]}
-      note={<p>O exercício do direito de arrependimento em comércio eletrônico deve ser facilitado, e a manifestação do consumidor deve ser confirmada pelo fornecedor. citeturn513419search2</p>}
+      note={<p>Nosso objetivo é oferecer um processo simples, documentado e compatível com os direitos do consumidor.</p>}
     />
   );
 }
