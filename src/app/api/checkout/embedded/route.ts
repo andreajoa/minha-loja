@@ -23,6 +23,10 @@ type Payload = {
   couponCode?: unknown;
 };
 
+function safeAnalyticsId(value: string) {
+  return /^[a-zA-Z0-9:_-]{8,120}$/.test(value) ? value : "";
+}
+
 export async function POST(req: Request) {
   try {
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
@@ -79,6 +83,8 @@ export async function POST(req: Request) {
     const cookieStore = await cookies();
     const marketingEmail = cookieStore.get("bt_marketing_email")?.value || "";
     const marketingToken = cookieStore.get("bt_marketing_token")?.value || "";
+    const analyticsSessionId = safeAnalyticsId(cookieStore.get("bt_analytics_session")?.value || "");
+    const analyticsVisitorId = safeAnalyticsId(cookieStore.get("bt_analytics_visitor")?.value || "");
     const canRecover = Boolean(
       marketingEmail && verifyMarketingToken(marketingToken, marketingEmail),
     );
@@ -177,6 +183,8 @@ export async function POST(req: Request) {
         destinationCep: shippingQuote.cep,
         destinationCity: shippingQuote.city.slice(0, 100),
         marketingRecovery: String(canRecover),
+        analyticsSessionId,
+        analyticsVisitorId,
         postPurchaseOfferViewed: "false",
         postPurchaseOfferClaimed: "false",
       },
@@ -188,6 +196,8 @@ export async function POST(req: Request) {
           discountSource: discount.source,
           couponCode: discount.coupon.valid ? discount.coupon.code : "",
           shippingId: shipping.id,
+          analyticsSessionId,
+          analyticsVisitorId,
         },
       },
     });
