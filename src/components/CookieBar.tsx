@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
@@ -17,17 +18,18 @@ export default function CookieBar() {
   if (!show) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-teal/20 bg-white/95 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl flex-col items-center gap-3 px-4 py-4 text-sm sm:flex-row sm:justify-between">
-        <p className="text-ardosia">
-          Usamos cookies para melhorar sua experiencia. Ao continuar, voce concorda com nossa{" "}
-          <Link href="/politicas/cookies" className="font-semibold text-teal-dark underline">
-            Politica de Cookies
+    <div className="fixed inset-x-0 bottom-0 z-50 border-t border-secondary/20 bg-white/97 pb-[env(safe-area-inset-bottom)] shadow-[0_-18px_55px_rgba(9,38,71,0.12)] backdrop-blur-xl">
+      <div className="mx-auto flex max-w-6xl flex-col items-stretch gap-3 px-4 py-4 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-5">
+        <p className="min-w-0 leading-6 text-text-light">
+          Usamos cookies para melhorar sua experiência. Ao continuar, você concorda com nossa{" "}
+          <Link href="/politicas/cookies" className="font-semibold text-secondary underline underline-offset-2">
+            Política de Cookies
           </Link>.
         </p>
         <button
+          type="button"
           onClick={accept}
-          className="rounded-full bg-teal px-6 py-2 font-semibold text-white transition hover:bg-teal-dark"
+          className="min-h-11 shrink-0 rounded-full bg-secondary px-7 py-2.5 font-semibold text-white transition hover:bg-primary"
         >
           Aceitar
         </button>
