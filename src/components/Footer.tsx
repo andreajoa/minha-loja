@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { categories } from "@/data/products";
 import FooterAnimals from "@/components/FooterAnimals";
+import NewsletterForm from "@/components/NewsletterForm";
 
 export default function Footer() {
-  const menuCategories = categories.filter((category) => category !== "Todos").slice(0, 6);
+  const menuCategories = categories
+    .filter((category) => category !== "Todos")
+    .slice(0, 6);
 
   return (
     <footer className="bg-background text-primary">
@@ -15,22 +18,9 @@ export default function Footer() {
           <p className="text-xs font-black uppercase tracking-[0.22em] text-white/70">Conteúdo e novidades</p>
           <h2 className="mt-3 font-display text-5xl">Receba escolhas mais conscientes no seu e-mail</h2>
           <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-white/78">
-            Novos produtos, orientações de uso e conteúdos para ajudar você a ensinar primeiro e comprar com mais clareza.
+            Novos produtos, orientações de uso, promoções e cupons para ajudar você a ensinar primeiro e comprar com mais clareza.
           </p>
-          <form action="/contato" method="get" className="mx-auto mt-8 flex max-w-xl flex-col gap-3 sm:flex-row">
-            <label className="sr-only" htmlFor="newsletter-email">Seu e-mail</label>
-            <input
-              id="newsletter-email"
-              name="email"
-              type="email"
-              required
-              placeholder="SEU E-MAIL"
-              className="min-h-12 flex-1 rounded-full border border-white/55 bg-white/10 px-5 text-sm text-white outline-none placeholder:text-white/65 focus:border-white focus:bg-white/15"
-            />
-            <button type="submit" className="button-shimmer min-h-12 rounded-full bg-primary px-8 text-xs font-black uppercase tracking-[0.16em] text-white transition hover:-translate-y-1 hover:bg-secondary-light hover:text-primary">
-              Quero receber
-            </button>
-          </form>
+          <NewsletterForm />
         </div>
       </section>
 
@@ -65,7 +55,7 @@ export default function Footer() {
           <h3 className="mt-4 font-display text-3xl">Precisa de ajuda?</h3>
           <p className="mt-5 text-sm leading-6 text-text-light">
             Atendimento de segunda a sexta, das 9h às 18h.<br />
-            <a href="mailto:info@brinqueteando.online" className="hover:text-secondary">
+            <a href="mailto:info@brinqueteando.online" className="font-bold text-secondary hover:underline">
               info@brinqueteando.online
             </a>
           </p>
