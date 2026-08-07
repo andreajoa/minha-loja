@@ -14,6 +14,8 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const wait = (ms = 650) => new Promise((resolve) => setTimeout(resolve, ms));
+
 function api(resend: Resend) {
   return resend as unknown as {
     templates: {
@@ -38,8 +40,11 @@ async function ensureTemplate(resend: Resend, template: MarketingTemplate) {
   let existing: any = null;
   try {
     const found = await r.templates.get(template.alias);
+    await wait();
     if (!found?.error && found?.data) existing = found.data;
-  } catch {}
+  } catch {
+    await wait();
+  }
 
   const payload = {
     alias: template.alias,
@@ -53,9 +58,11 @@ async function ensureTemplate(resend: Resend, template: MarketingTemplate) {
   let id = existing?.id || template.alias;
   if (existing) {
     const updated = await r.templates.update(template.alias, payload);
+    await wait();
     if (updated?.error) throw new Error(`${template.alias}: ${updated.error.message || "update failed"}`);
   } else {
     const created = await r.templates.create(payload);
+    await wait();
     if (created?.error || !created?.data?.id) {
       throw new Error(`${template.alias}: ${created?.error?.message || "create failed"}`);
     }
@@ -63,6 +70,7 @@ async function ensureTemplate(resend: Resend, template: MarketingTemplate) {
   }
 
   const published = await r.templates.publish(id);
+  await wait();
   if (published?.error) throw new Error(`${template.alias}: ${published.error.message || "publish failed"}`);
   return id;
 }
@@ -102,6 +110,7 @@ async function ensureEvents(resend: Resend) {
   for (const definition of definitions) {
     try {
       const created = await api(resend).events.create(definition);
+      await wait();
       if (created?.error) {
         const message = String(created.error.message || "");
         if (!/already|exist|duplicate/i.test(message)) throw new Error(message);
@@ -110,6 +119,7 @@ async function ensureEvents(resend: Resend) {
         results.push(`${definition.name}: criada`);
       }
     } catch (error) {
+      await wait();
       const message = error instanceof Error ? error.message : String(error);
       if (/already|exist|duplicate/i.test(message)) results.push(`${definition.name}: existente`);
       else throw error;
@@ -158,10 +168,10 @@ function recoveryAutomation(
   let previous = "start";
 
   for (let i = 0; i < templateIds.length; i++) {
-    const wait = `wait_${i + 1}`;
+    const waitStep = `wait_${i + 1}`;
     const send = `email_${i + 1}`;
     steps.push({
-      key: wait,
+      key: waitStep,
       type: "wait_for_event",
       config: { eventName: stopEvent, timeout: waits[i] },
     });
@@ -182,8 +192,8 @@ function recoveryAutomation(
         replyTo: marketingReplyTo,
       },
     });
-    connections.push({ from: previous, to: wait, type: "default" });
-    connections.push({ from: wait, to: send, type: "timeout" });
+    connections.push({ from: previous, to: waitStep, type: "default" });
+    connections.push({ from: waitStep, to: send, type: "timeout" });
     previous = send;
   }
 
@@ -195,17 +205,22 @@ async function ensureAutomation(resend: Resend, definition: any) {
   let existing: any = null;
   try {
     const listed = await r.automations.list();
+    await wait();
     const items = listed?.data?.data || listed?.data || [];
     existing = Array.isArray(items) ? items.find((item: any) => item.name === definition.name) : null;
-  } catch {}
+  } catch {
+    await wait();
+  }
 
   if (existing?.id) {
     const updated = await r.automations.update(existing.id, { status: "enabled" });
+    await wait();
     if (updated?.error) throw new Error(updated.error.message || `Falha ao ativar ${definition.name}`);
     return { name: definition.name, id: existing.id, status: "existing-enabled" };
   }
 
   const created = await r.automations.create(definition);
+  await wait();
   if (created?.error || !created?.data?.id) {
     throw new Error(created?.error?.message || `Falha ao criar ${definition.name}`);
   }
@@ -239,6 +254,7 @@ export async function GET(req: Request) {
         const ids: string[] = [];
         for (const template of templates) {
           const found = await api(resend).templates.get(template.alias);
+          await wait();
           if (found?.error || !found?.data?.id) throw new Error(`Template ausente: ${template.alias}`);
           ids.push(found.data.id);
         }
