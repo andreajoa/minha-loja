@@ -91,16 +91,16 @@ export default function StorefrontHome() {
         </div>
       </section>
 
-      <section className="border-y border-border/45 bg-background-alt py-18 sm:py-22">
-        <div className="mx-auto max-w-7xl px-5 text-center">
+      <section className="border-y border-border/45 bg-background-alt py-16 sm:py-22">
+        <div className="mx-auto max-w-7xl px-4 text-center sm:px-5">
           <SectionHeading eyebrow="Navegação simples" title="Escolha pelo objetivo do brincar" text="Encontre recursos de acordo com a experiência que você deseja apoiar." centered />
-          <div className="mt-12 flex snap-x gap-5 overflow-x-auto pb-5 sm:grid sm:grid-cols-3 sm:overflow-visible lg:grid-cols-6">
+          <div className="mt-10 grid grid-cols-2 gap-x-4 gap-y-8 sm:mt-12 sm:grid-cols-3 sm:gap-6 lg:grid-cols-6">
             {categoryList.slice(0, 6).map((category) => {
               const image = categoryImages[category];
 
               return (
-                <Link key={category} href={`/colecoes?categoria=${encodeURIComponent(category)}`} className="group min-w-36 snap-start text-center">
-                  <div className="relative mx-auto aspect-square w-32 overflow-hidden rounded-full border-4 border-white bg-background shadow-[0_18px_45px_rgba(9,38,71,0.10)] transition duration-300 group-hover:-translate-y-2 group-hover:border-secondary-light/60 group-hover:shadow-[0_24px_60px_rgba(9,38,71,0.18)]">
+                <Link key={category} href={`/colecoes?categoria=${encodeURIComponent(category)}`} className="group min-w-0 text-center">
+                  <div className="relative mx-auto aspect-square w-full max-w-32 overflow-hidden rounded-full border-4 border-white bg-background shadow-[0_14px_35px_rgba(9,38,71,0.10)] transition duration-300 group-hover:-translate-y-1 group-hover:border-secondary-light/60 group-hover:shadow-[0_20px_50px_rgba(9,38,71,0.16)] sm:max-w-36">
                     {image ? (
                       <img
                         src={image}
@@ -109,12 +109,12 @@ export default function StorefrontHome() {
                         height="512"
                         loading="lazy"
                         decoding="async"
-                        className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
+                        className="h-full w-full object-cover object-center transition duration-500 group-hover:scale-[1.05]"
                       />
                     ) : null}
                     <div className="pointer-events-none absolute inset-2 rounded-full border border-white/65" />
                   </div>
-                  <p className="mt-4 text-xs font-black uppercase tracking-[0.14em] text-primary transition group-hover:text-secondary">{category}</p>
+                  <p className="mt-3 break-words text-[10px] font-black uppercase tracking-[0.11em] text-primary transition group-hover:text-secondary sm:mt-4 sm:text-xs sm:tracking-[0.14em]">{category}</p>
                 </Link>
               );
             })}
