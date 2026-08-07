@@ -8,6 +8,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CookieBar from "@/components/CookieBar";
 import CartProvider from "@/components/CartProvider";
+import CartRecoveryTracker from "@/components/CartRecoveryTracker";
+import CartRecoveryRestorer from "@/components/CartRecoveryRestorer";
 import InstagramStrip from "@/components/InstagramStrip";
 import NewsletterOfferPopup from "@/components/NewsletterOfferPopup";
 
@@ -46,6 +48,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <html lang="pt-BR">
         <body className="flex min-h-screen flex-col antialiased">
           <CartProvider>
+            <CartRecoveryTracker />
+            <CartRecoveryRestorer />
             <Header />
             <main className="flex-1">{children}</main>
             <InstagramStrip />
