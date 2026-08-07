@@ -1,6 +1,6 @@
 name: Activate BrinqueTEAndo marketing public route
 
-# Reexecução após confirmação do deployment de produção.
+# Reexecução com RESEND_API_KEY Full Access já aplicada em produção.
 on:
   push:
     branches: [main]
