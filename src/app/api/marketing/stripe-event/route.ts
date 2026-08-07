@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { recordAnalyticsPurchase } from "@/lib/analytics-db";
 
 export const runtime = "nodejs";
 
@@ -8,7 +9,7 @@ export async function POST(req: Request) {
   try {
     const stripeKey = process.env.STRIPE_SECRET_KEY;
     const resendKey = process.env.RESEND_API_KEY;
-    if (!stripeKey || !resendKey) {
+    if (!stripeKey) {
       return NextResponse.json({ received: true });
     }
 
@@ -29,8 +30,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ received: true });
     }
 
+    try {
+      await recordAnalyticsPurchase({
+        eventId: `stripe:${event.id}`,
+        sessionId: session.metadata?.analyticsSessionId || "",
+        visitorId: session.metadata?.analyticsVisitorId || "",
+        orderId: session.id,
+        revenueCents: session.amount_total || 0,
+        cart: session.metadata?.cart || "",
+      });
+    } catch (analyticsError) {
+      console.error("Purchase analytics exception:", analyticsError);
+    }
+
     const email = session.customer_details?.email || session.customer_email || "";
-    if (!email) return NextResponse.json({ received: true });
+    if (!email || !resendKey) return NextResponse.json({ received: true });
 
     const resend = new Resend(resendKey);
     const events = [
