@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useCart } from "@/components/CartProvider";
 import ShippingCalculator from "@/components/ShippingCalculator";
+import CartCouponBox from "@/components/CartCouponBox";
 import { formatPrice, products, type Product } from "@/data/products";
 import {
   calculateDiscount,
@@ -17,17 +18,32 @@ import {
 import type { ShippingOption, ShippingQuote } from "@/lib/shipping-server";
 import { withBasePath } from "@/lib/paths";
 
-function ProductVisual({ product, size = "large" }: { product: Product; size?: "small" | "large" }) {
+function ProductVisual({
+  product,
+  size = "large",
+}: {
+  product: Product;
+  size?: "small" | "large";
+}) {
   return (
     <div
       className={`flex shrink-0 items-center justify-center overflow-hidden bg-gradient-to-br from-background-alt via-white to-secondary-light/15 ${
-        size === "large" ? "aspect-square w-full rounded-2xl sm:w-32" : "h-16 w-16 rounded-2xl"
+        size === "large"
+          ? "aspect-square w-full rounded-2xl sm:w-32"
+          : "h-16 w-16 rounded-2xl"
       }`}
     >
       {product.image ? (
-        <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
+        <img
+          src={product.image}
+          alt={product.name}
+          className="h-full w-full object-cover"
+        />
       ) : (
-        <span className={size === "large" ? "text-6xl" : "text-4xl"} aria-hidden="true">
+        <span
+          className={size === "large" ? "text-6xl" : "text-4xl"}
+          aria-hidden="true"
+        >
           {product.emoji}
         </span>
       )}
@@ -59,9 +75,15 @@ function QuickAddCard({
       <div className="flex items-center gap-4">
         <ProductVisual product={product} size="small" />
         <div className="min-w-0">
-          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-secondary">{label}</p>
-          <h3 className="mt-1 font-display text-2xl leading-none text-primary">{product.name}</h3>
-          <p className="mt-2 font-black text-primary">{formatPrice(product.price)}</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-secondary">
+            {label}
+          </p>
+          <h3 className="mt-1 font-display text-2xl leading-none text-primary">
+            {product.name}
+          </h3>
+          <p className="mt-2 font-black text-primary">
+            {formatPrice(product.price)}
+          </p>
         </div>
       </div>
       <p className="mt-4 text-sm leading-6 text-text-light">{description}</p>
@@ -82,10 +104,12 @@ function QuickAddCard({
 
 export default function CarrinhoPage() {
   const { items, addItem, updateQuantity, removeItem } = useCart();
-  const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
+  const [selectedShipping, setSelectedShipping] =
+    useState<ShippingOption | null>(null);
   const [shippingQuote, setShippingQuote] = useState<ShippingQuote | null>(null);
   const [cep, setCep] = useState("");
   const [error, setError] = useState("");
+  const [couponCode, setCouponCode] = useState("");
 
   const detailedItems = useMemo(
     () =>
@@ -102,7 +126,7 @@ export default function CarrinhoPage() {
     (total, item) => total + item.product.price * item.quantity,
     0,
   );
-  const discount = calculateDiscount(subtotal);
+  const discount = calculateDiscount(subtotal, couponCode);
   const progress = getDiscountProgress(subtotal);
   const orderBump = items.length ? getOrderBump(items) : null;
   const upsell = items.length ? getUpsell(items) : null;
@@ -114,7 +138,9 @@ export default function CarrinhoPage() {
   function goToCheckout() {
     setError("");
     if (!selectedShipping || !shippingQuote || !cep) {
-      setError("Calcule o frete e escolha uma opção de entrega antes de continuar.");
+      setError(
+        "Calcule o frete e escolha uma opção de entrega antes de continuar.",
+      );
       return;
     }
 
@@ -122,16 +148,24 @@ export default function CarrinhoPage() {
       cep,
       shipping: selectedShipping.id,
     });
+    if (discount.coupon.valid) {
+      query.set("coupon", discount.coupon.code);
+    }
     window.location.assign(withBasePath(`/checkout?${query.toString()}`));
   }
 
   if (!detailedItems.length) {
     return (
       <div className="hero-grid min-h-[70vh] px-5 py-20 text-center">
-        <div className="mx-auto flex h-24 w-24 animate-bob items-center justify-center rounded-full bg-white text-5xl shadow-[0_18px_45px_rgba(9,38,71,0.1)]">🛒</div>
-        <h1 className="mt-6 font-display text-5xl text-primary">Seu carrinho está esperando uma descoberta</h1>
+        <div className="mx-auto flex h-24 w-24 animate-bob items-center justify-center rounded-full bg-white text-5xl shadow-[0_18px_45px_rgba(9,38,71,0.1)]">
+          🛒
+        </div>
+        <h1 className="mt-6 font-display text-5xl text-primary">
+          Seu carrinho está esperando uma descoberta
+        </h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-text-light">
-          Escolha recursos pelo interesse e pelo objetivo do brincar. As ofertas aparecem como apoio à decisão, não como pressão.
+          Escolha recursos pelo interesse e pelo objetivo do brincar. As ofertas
+          aparecem como apoio à decisão, não como pressão.
         </p>
         <Link
           href="/colecoes"
@@ -147,26 +181,42 @@ export default function CarrinhoPage() {
     <div className="bg-background">
       <section className="hero-grid border-b border-border/45 px-5 py-12 sm:py-16">
         <div className="mx-auto max-w-7xl">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-secondary">Seu pedido, sem surpresas</p>
-          <h1 className="mt-3 font-display text-5xl text-primary sm:text-6xl">Carrinho inteligente</h1>
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-secondary">
+            Seu pedido, sem surpresas
+          </p>
+          <h1 className="mt-3 font-display text-5xl text-primary sm:text-6xl">
+            Carrinho inteligente
+          </h1>
           <p className="mt-4 max-w-2xl leading-7 text-text-light">
-            Veja o desconto aplicado, calcule a entrega e acrescente recursos complementares sem sair desta página.
+            Veja o desconto aplicado, calcule a entrega e acrescente recursos
+            complementares sem sair desta página.
           </p>
         </div>
       </section>
 
       <div className="mx-auto max-w-7xl px-5 py-10 sm:py-14">
         <section className="relative overflow-hidden rounded-[2rem] border border-secondary/25 bg-white p-6 shadow-[0_22px_55px_rgba(9,38,71,0.08)] sm:p-8">
-          <div className="absolute -right-10 -top-10 h-36 w-36 rounded-full bg-secondary-light/15" aria-hidden="true" />
+          <div
+            className="absolute -right-10 -top-10 h-36 w-36 rounded-full bg-secondary-light/15"
+            aria-hidden="true"
+          />
           <div className="relative flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.17em] text-secondary">Desconto automático por valor</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.17em] text-secondary">
+                Desconto automático por valor
+              </p>
               <h2 className="mt-2 font-display text-3xl text-primary sm:text-4xl">
-                {progress.current.percent > 0
-                  ? `${progress.current.percent}% já aplicado ao seu carrinho`
-                  : "Sua primeira meta começa em R$ 100"}
+                {discount.source === "coupon"
+                  ? `${discount.tier.percent}% aplicado com o cupom ${discount.coupon.code}`
+                  : progress.current.percent > 0
+                    ? `${progress.current.percent}% já aplicado ao seu carrinho`
+                    : "Sua primeira meta começa em R$ 100"}
               </h2>
-              <p className="mt-2 text-sm leading-6 text-text-light">{progress.message}</p>
+              <p className="mt-2 text-sm leading-6 text-text-light">
+                {discount.coupon.valid && discount.source === "progressive"
+                  ? `Seu cupom é válido, mas o desconto progressivo de ${discount.tier.percent}% é maior e foi mantido.`
+                  : progress.message}
+              </p>
             </div>
             <div className="rounded-full bg-primary px-5 py-3 text-center text-xs font-black uppercase tracking-[0.12em] text-white">
               Economia atual: {formatMoney(discount.amount)}
@@ -179,8 +229,12 @@ export default function CarrinhoPage() {
             />
           </div>
           <div className="mt-3 flex justify-between gap-3 text-[10px] font-black uppercase tracking-[0.1em] text-muted">
-            <span>{progress.current.percent}% liberado</span>
-            <span>{progress.next ? `Próxima meta: ${progress.next.percent}%` : "Meta máxima atingida"}</span>
+            <span>{progress.current.percent}% liberado por valor</span>
+            <span>
+              {progress.next
+                ? `Próxima meta: ${progress.next.percent}%`
+                : "Meta máxima atingida"}
+            </span>
           </div>
         </section>
 
@@ -195,27 +249,43 @@ export default function CarrinhoPage() {
 
                 <div className="flex min-w-0 flex-col justify-between gap-5 sm:flex-row sm:items-center">
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.15em] text-secondary">{product.category}</p>
-                    <Link href={`/produto/${product.id}`} className="mt-1 block font-display text-3xl leading-none text-primary transition hover:text-secondary">
+                    <p className="text-[10px] font-black uppercase tracking-[0.15em] text-secondary">
+                      {product.category}
+                    </p>
+                    <Link
+                      href={`/produto/${product.id}`}
+                      className="mt-1 block font-display text-3xl leading-none text-primary transition hover:text-secondary"
+                    >
                       {product.name}
                     </Link>
-                    <p className="mt-3 text-sm text-text-light">{formatPrice(product.price)} por unidade</p>
+                    <p className="mt-3 text-sm text-text-light">
+                      {formatPrice(product.price)} por unidade
+                    </p>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-3 sm:justify-end">
                     <div className="inline-flex items-center rounded-full border border-border/60 bg-background p-1">
                       <button
                         type="button"
-                        onClick={() => updateQuantity(product.id, quantity - 1)}
+                        onClick={() =>
+                          updateQuantity(product.id, quantity - 1)
+                        }
                         className="flex h-9 w-9 items-center justify-center rounded-full font-black text-primary transition hover:bg-white"
                         aria-label={`Diminuir quantidade de ${product.name}`}
                       >
                         −
                       </button>
-                      <span className="min-w-10 text-center font-black text-primary" aria-live="polite">{quantity}</span>
+                      <span
+                        className="min-w-10 text-center font-black text-primary"
+                        aria-live="polite"
+                      >
+                        {quantity}
+                      </span>
                       <button
                         type="button"
-                        onClick={() => updateQuantity(product.id, quantity + 1)}
+                        onClick={() =>
+                          updateQuantity(product.id, quantity + 1)
+                        }
                         disabled={quantity >= Math.min(10, product.stock)}
                         className="flex h-9 w-9 items-center justify-center rounded-full font-black text-primary transition hover:bg-white disabled:opacity-30"
                         aria-label={`Aumentar quantidade de ${product.name}`}
@@ -245,14 +315,22 @@ export default function CarrinhoPage() {
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
                   <ProductVisual product={orderBump} size="small" />
                   <div className="flex-1">
-                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-secondary">Order bump · adição rápida</p>
-                    <h2 className="mt-1 font-display text-3xl text-primary">Leve também {orderBump.name}</h2>
+                    <p className="text-[10px] font-black uppercase tracking-[0.16em] text-secondary">
+                      Order bump · adição rápida
+                    </p>
+                    <h2 className="mt-1 font-display text-3xl text-primary">
+                      Leve também {orderBump.name}
+                    </h2>
                     <p className="mt-2 text-sm leading-6 text-text-light">
-                      Uma opção de menor investimento para ampliar as possibilidades de brincadeira e aproximar o carrinho da próxima meta de desconto.
+                      Uma opção de menor investimento para ampliar as
+                      possibilidades de brincadeira e aproximar o carrinho da
+                      próxima meta de desconto.
                     </p>
                   </div>
                   <div className="sm:text-right">
-                    <p className="font-display text-3xl text-primary">{formatPrice(orderBump.price)}</p>
+                    <p className="font-display text-3xl text-primary">
+                      {formatPrice(orderBump.price)}
+                    </p>
                     <button
                       type="button"
                       onClick={() => addItem(orderBump.id)}
@@ -278,15 +356,23 @@ export default function CarrinhoPage() {
           </div>
 
           <aside className="rounded-[2rem] border border-border/50 bg-white p-6 shadow-[0_24px_65px_rgba(9,38,71,0.1)] lg:sticky lg:top-40">
-            <h2 className="font-display text-3xl text-primary">Resumo do pedido</h2>
+            <h2 className="font-display text-3xl text-primary">
+              Resumo do pedido
+            </h2>
             <div className="mt-6 space-y-4 border-b border-border/50 pb-6 text-sm">
               <div className="flex justify-between gap-4 text-text-light">
                 <span>Subtotal</span>
-                <strong className="text-primary">{formatPrice(subtotal)}</strong>
+                <strong className="text-primary">
+                  {formatPrice(subtotal)}
+                </strong>
               </div>
               {discount.tier.percent > 0 ? (
                 <div className="flex justify-between gap-4 text-secondary">
-                  <span>Desconto progressivo ({discount.tier.percent}%)</span>
+                  <span>
+                    {discount.source === "coupon"
+                      ? `Cupom ${discount.coupon.code} (${discount.tier.percent}%)`
+                      : `Desconto progressivo (${discount.tier.percent}%)`}
+                  </span>
                   <strong>− {formatMoney(discount.amount)}</strong>
                 </div>
               ) : null}
@@ -302,13 +388,23 @@ export default function CarrinhoPage() {
               </div>
             </div>
 
+            <CartCouponBox
+              subtotal={subtotal}
+              onCouponChange={setCouponCode}
+            />
+
             <div className="flex items-end justify-between gap-4 py-6">
               <span className="font-black text-primary">Total estimado</span>
-              <strong className="font-display text-4xl text-primary">{formatMoney(total)}</strong>
+              <strong className="font-display text-4xl text-primary">
+                {formatMoney(total)}
+              </strong>
             </div>
 
             {error ? (
-              <p className="mb-4 rounded-2xl bg-secondary/10 p-4 text-sm font-bold text-secondary" role="alert">
+              <p
+                className="mb-4 rounded-2xl bg-secondary/10 p-4 text-sm font-bold text-secondary"
+                role="alert"
+              >
                 {error}
               </p>
             ) : null}
@@ -324,18 +420,26 @@ export default function CarrinhoPage() {
             <div className="mt-5 space-y-2 text-xs leading-relaxed text-muted">
               <p>🔒 Checkout incorporado e processado pela Stripe.</p>
               <p>📦 O frete será recalculado no servidor antes do pagamento.</p>
-              <p>🏷️ O desconto progressivo é aplicado automaticamente e não é cumulativo com outras campanhas.</p>
+              <p>
+                🏷️ Cupom e desconto progressivo não são cumulativos. A loja
+                aplica automaticamente o maior desconto.
+              </p>
             </div>
           </aside>
         </div>
 
-        {(upsell || downsell || crossSell.length > 0) ? (
+        {upsell || downsell || crossSell.length > 0 ? (
           <section className="mt-14 border-t border-border/50 pt-12">
             <div className="max-w-3xl">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-secondary">Escolhas que fazem sentido juntas</p>
-              <h2 className="mt-3 font-display text-4xl text-primary sm:text-5xl">Complete a proposta sem perder o ritmo</h2>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-secondary">
+                Escolhas que fazem sentido juntas
+              </p>
+              <h2 className="mt-3 font-display text-4xl text-primary sm:text-5xl">
+                Complete a proposta sem perder o ritmo
+              </h2>
               <p className="mt-4 leading-7 text-text-light">
-                As sugestões abaixo consideram preço e variedade. Acrescente apenas o que realmente combinar com o objetivo do brincar.
+                As sugestões abaixo consideram preço e variedade. Acrescente
+                apenas o que realmente combinar com o objetivo do brincar.
               </p>
             </div>
 
@@ -358,7 +462,12 @@ export default function CarrinhoPage() {
                 />
               ) : null}
               {crossSell
-                .filter((product) => product.id !== upsell?.id && product.id !== downsell?.id && product.id !== orderBump?.id)
+                .filter(
+                  (product) =>
+                    product.id !== upsell?.id &&
+                    product.id !== downsell?.id &&
+                    product.id !== orderBump?.id,
+                )
                 .map((product) => (
                   <QuickAddCard
                     key={product.id}
