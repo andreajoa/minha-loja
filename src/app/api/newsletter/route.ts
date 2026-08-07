@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { NEWSLETTER_COUPON_CODE } from "@/lib/coupons";
+import { createMarketingToken } from "@/lib/marketing-token";
 
 export const runtime = "nodejs";
 
@@ -73,9 +74,8 @@ export async function POST(req: Request) {
     let contactSaved = false;
     let confirmationSent = false;
     let storeNotificationSent = false;
+    let automationTriggered = false;
 
-    // O cadastro em Contacts exige chave Full Access. Se a chave for apenas
-    // Sending Access, os e-mails abaixo continuam garantindo a captura do lead.
     try {
       const created = await resend.contacts.create({ email, unsubscribed: false });
       if (!created.error) {
@@ -90,7 +90,7 @@ export async function POST(req: Request) {
     }
 
     const couponBlock = source === "popup"
-      ? `<div style="margin:24px 0;padding:20px;border-radius:16px;background:#F2E6DE;text-align:center"><p style="margin:0 0 8px;font-size:13px;color:#A14D2D;font-weight:700;text-transform:uppercase;letter-spacing:.12em">Seu cupom de boas-vindas</p><p style="margin:0;font-size:30px;color:#092647;font-weight:900;letter-spacing:.08em">${NEWSLETTER_COUPON_CODE}</p><p style="margin:10px 0 0;font-size:14px;color:#435367">Use no carrinho para receber 5% de desconto. Se houver desconto progressivo maior, aplicamos automaticamente a melhor condição.</p></div>`
+      ? `<div style="margin:24px 0;padding:20px;border-radius:16px;background:#F2E6DE;text-align:center"><p style="margin:0 0 8px;font-size:13px;color:#A14D2A;font-weight:700;text-transform:uppercase;letter-spacing:.12em">Seu cupom de boas-vindas</p><p style="margin:0;font-size:30px;color:#09274B;font-weight:900;letter-spacing:.08em">${NEWSLETTER_COUPON_CODE}</p><p style="margin:10px 0 0;font-size:14px;color:#435367">Use no carrinho para receber 5% de desconto. Se houver desconto progressivo maior, aplicamos automaticamente a melhor condição.</p></div>`
       : "";
 
     try {
@@ -101,7 +101,7 @@ export async function POST(req: Request) {
         subject: source === "popup"
           ? "Seu cupom de 5% chegou | BrinqueTEAndo"
           : "Que alegria ter você por aqui | BrinqueTEAndo",
-        html: `<div style="background:#FDF9F6;padding:32px 16px;font-family:Arial,sans-serif;color:#435367"><div style="max-width:620px;margin:0 auto;background:#fff;border-radius:24px;overflow:hidden;border:1px solid #D9CBC1"><div style="background:#092647;padding:28px;text-align:center;color:#fff"><div style="font-size:30px;font-weight:800">BrinqueTEAndo</div></div><div style="padding:32px"><h1 style="margin:0 0 16px;color:#092647;font-size:27px">Sua inscrição foi confirmada!</h1><p style="font-size:16px;line-height:1.75">É uma honra saber que você quer receber nossas promoções, cupons de desconto, novidades e conteúdos preparados com propósito.</p>${couponBlock}<p style="margin-top:24px;font-size:14px;line-height:1.7">Se precisar falar conosco, responda este e-mail.</p></div></div></div>`,
+        html: `<div style="background:#FFF8F3;padding:32px 16px;font-family:Arial,sans-serif;color:#435367"><div style="max-width:620px;margin:0 auto;background:#fff;border-radius:24px;overflow:hidden;border:1px solid #D9CBC1"><div style="background:#09274B;padding:28px;text-align:center;color:#fff"><div style="font-size:30px;font-weight:800">BrinqueTEAndo</div></div><div style="padding:32px"><h1 style="margin:0 0 16px;color:#09274B;font-size:27px">Sua inscrição foi confirmada!</h1><p style="font-size:16px;line-height:1.75">É uma honra saber que você quer receber nossas promoções, cupons de desconto, novidades e conteúdos preparados com propósito.</p>${couponBlock}<p style="margin-top:24px;font-size:14px;line-height:1.7">A sequência de conteúdos começa em 3 dias. Se precisar falar conosco, responda este e-mail.</p></div></div></div>`,
       });
       confirmationSent = !result.error;
       if (result.error) console.error("Resend confirmation:", result.error);
@@ -115,12 +115,28 @@ export async function POST(req: Request) {
         to: [STORE_EMAIL],
         replyTo: email,
         subject: `Nova inscrição na newsletter | ${source === "popup" ? "Cupom 5%" : "Rodapé"}`,
-        html: `<div style="font-family:Arial,sans-serif;color:#24364A;padding:24px"><h1 style="color:#092647">Nova inscrição BrinqueTEAndo</h1><p><strong>E-mail:</strong> ${escapeHtml(email)}</p><p><strong>WhatsApp:</strong> ${escapeHtml(whatsapp || "Não informado")}</p><p><strong>Origem:</strong> ${source === "popup" ? "Pop-up do cupom de 5%" : "Formulário do rodapé"}</p><p><strong>Consentimento:</strong> confirmado</p></div>`,
+        html: `<div style="font-family:Arial,sans-serif;color:#24364A;padding:24px"><h1 style="color:#09274B">Nova inscrição BrinqueTEAndo</h1><p><strong>E-mail:</strong> ${escapeHtml(email)}</p><p><strong>WhatsApp:</strong> ${escapeHtml(whatsapp || "Não informado")}</p><p><strong>Origem:</strong> ${source === "popup" ? "Pop-up do cupom de 5%" : "Formulário do rodapé"}</p><p><strong>Consentimento:</strong> confirmado</p></div>`,
       });
       storeNotificationSent = !result.error;
       if (result.error) console.error("Resend store notification:", result.error);
     } catch (error) {
       console.error("Resend store notification exception:", error);
+    }
+
+    try {
+      const result = await resend.events.send({
+        event: "newsletter.subscribed",
+        email,
+        payload: {
+          source,
+          couponCode: source === "popup" ? NEWSLETTER_COUPON_CODE : "",
+          whatsapp: whatsapp || "",
+        },
+      });
+      automationTriggered = !result.error;
+      if (result.error) console.error("Resend newsletter event:", result.error);
+    } catch (error) {
+      console.error("Resend newsletter event exception:", error);
     }
 
     const captured = contactSaved || confirmationSent || storeNotificationSent;
@@ -134,12 +150,17 @@ export async function POST(req: Request) {
       );
     }
 
+    const marketingToken = createMarketingToken(email);
+
     return NextResponse.json({
       ok: true,
       couponCode: source === "popup" ? NEWSLETTER_COUPON_CODE : undefined,
       emailSent: confirmationSent,
       contactSaved,
       ownerNotificationSent: storeNotificationSent,
+      automationTriggered,
+      marketingToken,
+      marketingEmail: email,
       message: confirmationSent
         ? "Sua inscrição foi confirmada. É uma honra saber que você quer receber promoções, cupons de desconto e muito mais em nossa newsletter!"
         : "Seu cadastro foi recebido e seu benefício está liberado. Anote o cupom exibido nesta tela.",
