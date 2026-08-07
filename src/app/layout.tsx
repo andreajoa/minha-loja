@@ -8,9 +8,10 @@ import Footer from "@/components/Footer";
 import CookieBar from "@/components/CookieBar";
 import CartProvider from "@/components/CartProvider";
 import InstagramStrip from "@/components/InstagramStrip";
+import NewsletterOfferPopup from "@/components/NewsletterOfferPopup";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.adhdautism.online"),
+  metadataBase: new URL("https://www.brinqueteando.online"),
   title: {
     default: "BrinqueTEAndo | Brinquedos sensoriais e pedagógicos",
     template: "%s | BrinqueTEAndo",
@@ -47,6 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <InstagramStrip />
             <Footer />
             <CookieBar />
+            <NewsletterOfferPopup />
           </CartProvider>
         </body>
       </html>
