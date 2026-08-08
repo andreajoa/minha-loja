@@ -11,7 +11,8 @@ export async function GET() {
 
   const status = await getResendTrackingStatus();
   if (!status.domainId) {
-    return NextResponse.json({ ok: false, error: status.error || "Domínio não localizado" }, { status: 404 });
+    const statusError = "error" in status ? status.error || "" : "";
+    return NextResponse.json({ ok: false, error: statusError || "Domínio não localizado" }, { status: 404 });
   }
 
   const resend = new Resend(key);
