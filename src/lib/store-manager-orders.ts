@@ -28,6 +28,7 @@ type StripeLike = {
 
 type CheckoutSessionLike = {
   id: string;
+  metadata?: Record<string, string> | null;
   amount_subtotal?: number | null;
   amount_total?: number | null;
   currency?: string | null;
@@ -182,12 +183,14 @@ export async function pushPaidCheckoutToStoreManager(input: {
     throw new Error("Reconciliação do checkout Stripe divergiu; envio ao Store Manager bloqueado.");
   }
 
+  const reservationId = input.session.metadata?.store_manager_reservation_id?.trim() || null;
   const event = {
     eventId: input.stripeEventId,
     eventType: "order.paid",
     occurredAt: new Date(input.stripeEventCreated * 1000).toISOString(),
     order: {
       id: input.session.id,
+      reservationId,
       scope: fullOrder ? "FULL_ORDER" : "MANAGED_ITEMS",
       sourceOrderTotalCents,
       currency: (input.session.currency || "brl").toUpperCase(),
