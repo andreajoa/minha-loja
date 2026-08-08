@@ -1,14 +1,9 @@
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
-import { products } from "@/data/products";
+import { normalizeCart, serializeCart, type CartLine } from "@/lib/commerce";
 import { BASE_PATH } from "@/lib/paths";
 
 export const runtime = "nodejs";
-
-type CheckoutItem = {
-  id?: unknown;
-  quantity?: unknown;
-};
 
 export async function POST(req: Request) {
   try {
@@ -20,28 +15,12 @@ export async function POST(req: Request) {
       );
     }
 
-    const payload = (await req.json()) as { cart?: CheckoutItem[] };
-    if (!Array.isArray(payload.cart) || payload.cart.length === 0 || payload.cart.length > 20) {
+    const payload = (await req.json()) as { cart?: CartLine[] };
+    if (!Array.isArray(payload.cart)) {
       return NextResponse.json({ error: "Carrinho inválido." }, { status: 400 });
     }
 
-    const normalizedCart = payload.cart.map((item) => {
-      if (typeof item.id !== "string") throw new Error("Produto inválido.");
-
-      const quantity = Number(item.quantity);
-      if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) {
-        throw new Error("Quantidade inválida.");
-      }
-
-      const product = products.find((candidate) => candidate.id === item.id);
-      if (!product) throw new Error("Produto não encontrado.");
-      if (product.stock <= 0 || quantity > product.stock) {
-        throw new Error(`Estoque insuficiente para ${product.name}.`);
-      }
-
-      return { product, quantity };
-    });
-
+    const normalizedCart = normalizeCart(payload.cart);
     const stripe = new Stripe(stripeSecretKey);
     const requestUrl = new URL(req.url);
     const appUrl = (
@@ -60,18 +39,24 @@ export async function POST(req: Request) {
       billing_address_collection: "required",
       shipping_address_collection: { allowed_countries: ["BR"] },
       phone_number_collection: { enabled: true },
-      line_items: normalizedCart.map(({ product, quantity }) => ({
-        price_data: {
-          currency: "brl",
-          product_data: {
-            name: product.name,
-            description: product.description,
-            metadata: { productId: product.id },
+      line_items: normalizedCart.map(
+        ({ product, variant, variantId, unitPrice, quantity }) => ({
+          price_data: {
+            currency: "brl",
+            product_data: {
+              name: variant ? `${product.name} · ${variant.name}` : product.name,
+              description: product.description,
+              metadata: {
+                productId: product.id,
+                variantId: variantId || "",
+                variantName: variant?.name || "",
+              },
+            },
+            unit_amount: unitPrice,
           },
-          unit_amount: product.price,
-        },
-        quantity,
-      })),
+          quantity,
+        }),
+      ),
       shipping_options: [
         {
           shipping_rate_data: {
@@ -89,10 +74,7 @@ export async function POST(req: Request) {
       cancel_url: `${appUrl}/carrinho`,
       metadata: {
         store: "brinqueteando",
-        cart: normalizedCart
-          .map(({ product, quantity }) => `${product.id}:${quantity}`)
-          .join(",")
-          .slice(0, 500),
+        cart: serializeCart(payload.cart),
       },
     });
 
@@ -105,8 +87,14 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ url: session.url });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Erro ao iniciar o pagamento.";
-    const status = message.includes("inválid") || message.includes("Estoque") || message.includes("não encontrado") ? 400 : 500;
+    const message =
+      error instanceof Error ? error.message : "Erro ao iniciar o pagamento.";
+    const status =
+      message.includes("inválid") ||
+      message.includes("Estoque") ||
+      message.includes("não encontrado")
+        ? 400
+        : 500;
     return NextResponse.json({ error: message }, { status });
   }
 }
