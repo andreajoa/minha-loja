@@ -1,4 +1,13 @@
-export type ProductVariant = { name: string; stock: number; price: number };
+import managedCatalogJson from "./store-manager-products.json";
+
+export type ProductVariant = {
+  sourceSkuId?: string;
+  name: string;
+  stock: number;
+  price: number;
+  attributes?: Record<string, string>;
+  image?: string | null;
+};
 
 export type Product = {
   id: string;
@@ -18,7 +27,7 @@ export type Product = {
 
 // Catálogo local com fotografias, descrições, preços e estoque armazenados no próprio projeto.
 // ATENÇÃO: peso e dimensões são provisórios. Confirme as medidas reais antes de ativar a cotação contratual dos Correios.
-export const products: Product[] = [
+const legacyProducts: Product[] = [
   {
     id: "14955388567918",
     name: "Painel Sensorial",
@@ -344,6 +353,71 @@ export const products: Product[] = [
     shipping: { weightGrams: 250, lengthCm: 18, widthCm: 15, heightCm: 12 },
   },
 ];
+
+type ManagedProduct = {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  image: string;
+  gallery?: string[];
+  editorialAssets?: Array<{ id: string; type: string }>;
+  variants?: Array<{
+    sourceSkuId: string;
+    name: string;
+    price: number;
+    stock: number;
+    attributes?: Record<string, string>;
+    imageUrl?: string | null;
+  }>;
+  category: string;
+  ageRange: string;
+  stock: number;
+  benefits: string[];
+  shipping: { weightGrams: number; lengthCm: number; widthCm: number; heightCm: number };
+};
+
+const managedCatalog = managedCatalogJson as unknown as {
+  version: number;
+  products: ManagedProduct[];
+};
+
+function managedProductToStoreProduct(product: ManagedProduct): Product {
+  const editorialGallery = (product.editorialAssets || []).map(
+    (asset) => `/products/catalog/${product.id}/${asset.id}.png`,
+  );
+  const gallery = editorialGallery.length > 0
+    ? editorialGallery
+    : (product.gallery || []).filter((item) => item.startsWith("/"));
+  const image = gallery[0] || (product.image.startsWith("/") ? product.image : "");
+
+  return {
+    id: product.id,
+    name: product.title,
+    description: product.description,
+    price: product.price,
+    image,
+    gallery,
+    variants: (product.variants || []).map((variant) => ({
+      sourceSkuId: variant.sourceSkuId,
+      name: variant.name,
+      price: variant.price,
+      stock: variant.stock,
+      attributes: variant.attributes,
+      image: variant.imageUrl && variant.imageUrl.startsWith("/") ? variant.imageUrl : null,
+    })),
+    emoji: "✨",
+    category: product.category,
+    stock: product.stock,
+    ageRange: product.ageRange,
+    benefits: product.benefits,
+    shipping: product.shipping,
+  };
+}
+
+const managedProducts = managedCatalog.products.map(managedProductToStoreProduct);
+
+export const products: Product[] = [...legacyProducts, ...managedProducts];
 
 export const categories = ["Todos", ...Array.from(new Set(products.map((product) => product.category)))];
 
