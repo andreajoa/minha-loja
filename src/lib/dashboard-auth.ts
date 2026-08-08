@@ -1,12 +1,7 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
 
-function allowedEmails() {
-  return (process.env.ANALYTICS_ADMIN_EMAILS || "andremuseu@gmail.com,info@brinqueteando.online")
-    .split(",")
-    .map((value) => value.trim().toLowerCase())
-    .filter(Boolean);
-}
+const DASHBOARD_ADMIN_EMAIL = "andremuseu@gmail.com";
 
 export async function requireDashboardAdmin() {
   const state = await auth();
@@ -15,15 +10,19 @@ export async function requireDashboardAdmin() {
   }
 
   const user = await currentUser();
-  const emails = user?.emailAddresses.map((item) => item.emailAddress.toLowerCase()) || [];
-  const allowed = allowedEmails();
-  const email = emails.find((item) => allowed.includes(item));
+  if (!user) notFound();
 
-  if (!user || !email) notFound();
+  const authorized = user.emailAddresses.find(
+    (item) =>
+      item.emailAddress.toLowerCase() === DASHBOARD_ADMIN_EMAIL &&
+      item.verification?.status === "verified",
+  );
+
+  if (!authorized) notFound();
 
   return {
     userId: user.id,
-    email,
-    name: user.fullName || user.firstName || email.split("@")[0],
+    email: authorized.emailAddress.toLowerCase(),
+    name: user.fullName || user.firstName || "Andre",
   };
 }
