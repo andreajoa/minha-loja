@@ -1,0 +1,60 @@
+name: Reconcile post-purchase variant safety once
+
+on:
+  push:
+    branches:
+      - store-manager/order-paid-webhook
+    paths:
+      - .github/workflows/reconcile-post-purchase-variant-safety-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: store-manager/order-paid-webhook
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Patch post-purchase recommendation
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const path = 'src/app/api/post-purchase/route.ts';
+          let s = fs.readFileSync(path, 'utf8');
+          if (!s.includes('isUnsafeAutomaticPostPurchaseProduct')) {
+            const imports = [...s.matchAll(/^import .*;$/gm)];
+            if (!imports.length) throw new Error('No import anchor found');
+            const last = imports[imports.length - 1];
+            const pos = last.index + last[0].length;
+            s = s.slice(0, pos) + '\nimport { isUnsafeAutomaticPostPurchaseProduct } from "@/lib/store-manager-post-purchase";' + s.slice(pos);
+          }
+          if (!s.includes('recommendedProductCandidate')) {
+            const pattern = /const recommendedProduct = getPostPurchaseRecommendation\(([\s\S]*?)\);/;
+            const match = s.match(pattern);
+            if (!match) throw new Error('Recommendation anchor not found');
+            const original = match[0].replace('const recommendedProduct =', 'const recommendedProductCandidate =');
+            const replacement = original + '\n  const recommendedProduct = recommendedProductCandidate && !isUnsafeAutomaticPostPurchaseProduct(recommendedProductCandidate.id)\n    ? recommendedProductCandidate\n    : null;';
+            s = s.replace(pattern, replacement);
+          }
+          fs.writeFileSync(path, s);
+          NODE
+      - name: Validate
+        run: |
+          npm ci
+          npx tsc --noEmit
+          npm run build
+      - name: Remove reconciler and commit
+        run: |
+          rm .github/workflows/reconcile-post-purchase-variant-safety-once.yml
+          git config user.name "store-manager-bot"
+          git config user.email "store-manager-bot@users.noreply.github.com"
+          git add src/app/api/post-purchase/route.ts src/lib/store-manager-post-purchase.ts .github/workflows/reconcile-post-purchase-variant-safety-once.yml
+          git diff --cached --quiet && exit 0
+          git commit -m "fix: block variant-managed products from automatic post-purchase offers"
+          git push origin HEAD:store-manager/order-paid-webhook

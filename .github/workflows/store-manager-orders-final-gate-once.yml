@@ -1,0 +1,47 @@
+name: Store Manager Orders Final Gate Once
+
+on:
+  push:
+    branches:
+      - store-manager/order-paid-webhook
+    paths:
+      - .github/workflows/store-manager-orders-final-gate-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  gate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: store-manager/order-paid-webhook
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Verify webhook wiring
+        run: |
+          grep -Fq 'pushPaidCheckoutToStoreManager' src/app/api/webhook/route.ts
+          grep -Fq 'Store Manager order push failed' src/app/api/webhook/route.ts
+          grep -Fq 'STORE_MANAGER_WEBHOOK_URL' src/lib/store-manager-orders.ts
+          grep -Fq 'STORE_MANAGER_WEBHOOK_TOKEN' src/lib/store-manager-orders.ts
+          grep -Fq 'MANAGED_ITEMS' src/lib/store-manager-orders.ts
+          grep -Fq 'isUnsafeAutomaticPostPurchaseProduct' src/app/api/post-purchase/route.ts
+          grep -Fq 'recommendedProductCandidate' src/app/api/post-purchase/route.ts
+      - run: npx tsc --noEmit
+      - run: npm run build
+      - name: Record immutable gate result
+        run: |
+          mkdir -p .quality-gates
+          printf '%s\n' 'STORE_MANAGER_ORDER_SENDER_FINAL_GATE=PASS' > .quality-gates/store-manager-orders.pass
+          rm .github/workflows/store-manager-orders-final-gate-once.yml
+          git config user.name "store-manager-bot"
+          git config user.email "store-manager-bot@users.noreply.github.com"
+          git add .quality-gates/store-manager-orders.pass .github/workflows/store-manager-orders-final-gate-once.yml
+          git commit -m "ci: record Store Manager order sender final gate"
+          git push origin HEAD:store-manager/order-paid-webhook
