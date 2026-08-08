@@ -1,4 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Contato e atendimento",
+  description:
+    "Fale com a BrinqueTEAndo sobre brinquedos sensoriais, pedagógicos, autismo, TDAH, entrega, pagamento e escolha de recursos de brincar.",
+  alternates: { canonical: "/contato" },
+};
 
 export default function Contato() {
   return (
@@ -12,7 +20,7 @@ export default function Contato() {
             Fale com a BrinqueTEAndo
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-text-light sm:text-lg">
-            Dúvidas sobre produtos, pagamento, entrega ou escolha por objetivo do brincar são bem-vindas.
+            Dúvidas sobre produtos, pagamento, entrega ou escolha por objetivo do brincar são bem-vindas. A curadoria é conduzida por Margareth Almeida, Neuropsicopedagoga.
           </p>
         </div>
       </section>
