@@ -40,12 +40,21 @@ jobs:
 
       - name: Start production server
         run: |
-          npm start -- --port 3001 > /tmp/store-manager-store-ci.log 2>&1 &
+          npx next start -p 3001 > /tmp/store-manager-store-ci.log 2>&1 &
           echo $! > /tmp/store-manager-store-ci.pid
-          for i in {1..30}; do
-            if curl -fsS http://127.0.0.1:3001/ > /dev/null; then exit 0; fi
+          for i in {1..45}; do
+            if curl -fsS http://127.0.0.1:3001/ > /dev/null; then
+              echo "production server ready"
+              exit 0
+            fi
+            if ! kill -0 $(cat /tmp/store-manager-store-ci.pid) 2>/dev/null; then
+              echo "production server exited early"
+              cat /tmp/store-manager-store-ci.log
+              exit 1
+            fi
             sleep 1
           done
+          echo "production server did not become ready"
           cat /tmp/store-manager-store-ci.log
           exit 1
 
