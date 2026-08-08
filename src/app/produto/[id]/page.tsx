@@ -4,7 +4,23 @@ import { notFound } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
 import ProductGallery from "@/components/ProductGallery";
 import ProductPurchasePanel from "@/components/ProductPurchasePanel";
+import managedCatalogJson from "@/data/store-manager-products.json";
 import { products } from "@/data/products";
+
+type ManagedSeoProduct = {
+  id: string;
+  seo?: {
+    title?: string;
+    description?: string;
+  };
+};
+
+function managedSeoFor(productId: string) {
+  const catalog = managedCatalogJson as unknown as {
+    products?: ManagedSeoProduct[];
+  };
+  return catalog.products?.find((item) => item.id === productId)?.seo;
+}
 
 export function generateStaticParams() {
   return products.map((product) => ({ id: product.id }));
@@ -20,20 +36,23 @@ export async function generateMetadata({
 
   if (!product) return { title: "Produto não encontrado" };
 
+  const managedSeo = managedSeoFor(product.id);
+  const seoTitle = managedSeo?.title?.trim() || product.name;
+  const seoDescription = managedSeo?.description?.trim() || product.description;
   const productPath = `/produto/${encodeURIComponent(product.id)}`;
   const socialImages = product.image
     ? [{ url: product.image, alt: product.name }]
     : undefined;
 
   return {
-    title: product.name,
-    description: product.description,
+    title: seoTitle,
+    description: seoDescription,
     alternates: {
       canonical: productPath,
     },
     openGraph: {
-      title: product.name,
-      description: product.description,
+      title: seoTitle,
+      description: seoDescription,
       url: productPath,
       siteName: "BrinqueTEAndo",
       locale: "pt_BR",
@@ -42,8 +61,8 @@ export async function generateMetadata({
     },
     twitter: {
       card: socialImages ? "summary_large_image" : "summary",
-      title: product.name,
-      description: product.description,
+      title: seoTitle,
+      description: seoDescription,
       ...(socialImages ? { images: socialImages.map((image) => image.url) } : {}),
     },
   };
