@@ -1,11 +1,27 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import AddToCartButton from "@/components/AddToCartButton";
 import ProductCard from "@/components/ProductCard";
-import ShippingCalculator from "@/components/ShippingCalculator";
-import { formatPrice, products } from "@/data/products";
+import ProductGallery from "@/components/ProductGallery";
+import ProductPurchasePanel from "@/components/ProductPurchasePanel";
+import managedCatalogJson from "@/data/store-manager-products.json";
+import { products } from "@/data/products";
 import { SITE_URL, breadcrumbJsonLd, jsonLd } from "@/lib/seo";
+
+type ManagedSeoProduct = {
+  id: string;
+  seo?: {
+    title?: string;
+    description?: string;
+  };
+};
+
+function managedSeoFor(productId: string) {
+  const catalog = managedCatalogJson as unknown as {
+    products?: ManagedSeoProduct[];
+  };
+  return catalog.products?.find((item) => item.id === productId)?.seo;
+}
 
 export function generateStaticParams() {
   return products.map((product) => ({ id: product.id }));
@@ -19,26 +35,37 @@ export async function generateMetadata({
   const { id } = await params;
   const product = products.find((item) => item.id === id);
 
-  if (!product) return { title: "Produto não encontrado", robots: { index: false, follow: false } };
+  if (!product) {
+    return {
+      title: "Produto não encontrado",
+      robots: { index: false, follow: false },
+    };
+  }
 
-  const canonical = `/produto/${product.id}`;
-  const description = `${product.description} ${product.ageRange}. Curadoria BrinqueTEAndo por Margareth Almeida, Neuropsicopedagoga.`;
+  const managedSeo = managedSeoFor(product.id);
+  const seoTitle = managedSeo?.title?.trim() || product.name;
+  const seoDescription =
+    managedSeo?.description?.trim() ||
+    `${product.description} ${product.ageRange}. Curadoria BrinqueTEAndo por Margareth Almeida, Neuropsicopedagoga.`;
+  const canonical = `/produto/${encodeURIComponent(product.id)}`;
 
   return {
-    title: product.name,
-    description,
+    title: seoTitle,
+    description: seoDescription,
     alternates: { canonical },
     openGraph: {
-      title: `${product.name} | BrinqueTEAndo`,
-      description,
+      title: `${seoTitle} | BrinqueTEAndo`,
+      description: seoDescription,
       url: canonical,
+      siteName: "BrinqueTEAndo",
+      locale: "pt_BR",
       type: "website",
       images: product.image ? [{ url: product.image, alt: product.name }] : undefined,
     },
     twitter: {
-      card: "summary_large_image",
-      title: `${product.name} | BrinqueTEAndo`,
-      description,
+      card: product.image ? "summary_large_image" : "summary",
+      title: `${seoTitle} | BrinqueTEAndo`,
+      description: seoDescription,
       images: product.image ? [product.image] : undefined,
     },
   };
@@ -54,10 +81,50 @@ export default async function ProductPage({
 
   if (!product) notFound();
 
-  const related = products.filter((item) => item.id !== product.id && item.category === product.category).slice(0, 3);
-  const relatedProducts = related.length > 0 ? related : products.filter((item) => item.id !== product.id).slice(0, 3);
-  const productUrl = `${SITE_URL}/produto/${product.id}`;
-  const images = product.gallery?.length ? product.gallery : product.image ? [product.image] : [];
+  const related = products
+    .filter((item) => item.id !== product.id && item.category === product.category)
+    .slice(0, 3);
+  const relatedProducts =
+    related.length > 0
+      ? related
+      : products.filter((item) => item.id !== product.id).slice(0, 3);
+  const productUrl = `${SITE_URL}/produto/${encodeURIComponent(product.id)}`;
+  const images = product.gallery?.length
+    ? product.gallery
+    : product.image
+      ? [product.image]
+      : [];
+  const absoluteImages = images.map((image) =>
+    /^https?:\/\//i.test(image) ? image : `${SITE_URL}${image}`,
+  );
+  const variants = product.variants || [];
+  const offers = variants.length > 0
+    ? variants.map((variant) => ({
+        "@type": "Offer",
+        sku: variant.sourceSkuId || `${product.id}-${variant.name}`,
+        name: `${product.name} · ${variant.name}`,
+        url: productUrl,
+        priceCurrency: "BRL",
+        price: (variant.price / 100).toFixed(2),
+        availability:
+          variant.stock > 0
+            ? "https://schema.org/InStock"
+            : "https://schema.org/OutOfStock",
+        itemCondition: "https://schema.org/NewCondition",
+        seller: { "@id": `${SITE_URL}/#organization` },
+      }))
+    : {
+        "@type": "Offer",
+        url: productUrl,
+        priceCurrency: "BRL",
+        price: (product.price / 100).toFixed(2),
+        availability:
+          product.stock > 0
+            ? "https://schema.org/InStock"
+            : "https://schema.org/OutOfStock",
+        itemCondition: "https://schema.org/NewCondition",
+        seller: { "@id": `${SITE_URL}/#organization` },
+      };
   const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -66,25 +133,25 @@ export default async function ProductPage({
     description: product.description,
     sku: product.id,
     category: product.category,
-    image: images.map((image) => `${SITE_URL}${image}`),
+    image: absoluteImages,
     brand: { "@type": "Brand", name: "BrinqueTEAndo" },
     audience: {
       "@type": "PeopleAudience",
       audienceType: "Crianças e famílias",
     },
     additionalProperty: [
-      { "@type": "PropertyValue", name: "Faixa etária", value: product.ageRange },
-      ...product.benefits.map((benefit) => ({ "@type": "PropertyValue", name: "Possibilidade de exploração", value: benefit })),
+      {
+        "@type": "PropertyValue",
+        name: "Faixa etária",
+        value: product.ageRange,
+      },
+      ...product.benefits.map((benefit) => ({
+        "@type": "PropertyValue",
+        name: "Possibilidade de exploração",
+        value: benefit,
+      })),
     ],
-    offers: {
-      "@type": "Offer",
-      url: productUrl,
-      priceCurrency: "BRL",
-      price: (product.price / 100).toFixed(2),
-      availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-      itemCondition: "https://schema.org/NewCondition",
-      seller: { "@id": `${SITE_URL}/#organization` },
-    },
+    offers,
   };
   const breadcrumb = breadcrumbJsonLd([
     { name: "Início", path: "/" },
@@ -94,25 +161,26 @@ export default async function ProductPage({
 
   return (
     <div className="bg-background">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(productJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(breadcrumb) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd(productJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd(breadcrumb) }}
+      />
+
       <div className="mx-auto max-w-7xl px-5 py-10 sm:py-16">
-        <Link href="/colecoes" className="nav-link inline-flex text-xs font-black uppercase tracking-[0.15em] text-secondary">
+        <Link
+          href="/colecoes"
+          className="nav-link inline-flex text-xs font-black uppercase tracking-[0.15em] text-secondary"
+        >
           ← Voltar para os produtos
         </Link>
 
         <div className="mt-8 grid items-start gap-10 lg:grid-cols-2 lg:gap-16">
           <div className="relative lg:sticky lg:top-40">
-            <div className="storybook-shadow hero-grid relative flex aspect-square items-center justify-center overflow-hidden rounded-[2.5rem] border border-border/45">
-              <div className="playful-ring absolute inset-10 animate-orbit" />
-              <div className="absolute right-8 top-8 animate-float text-4xl text-secondary-light" aria-hidden="true">✦</div>
-              <div className="absolute bottom-10 left-8 animate-float-slow text-4xl" aria-hidden="true">♡</div>
-              {product.image ? (
-                <img src={product.image} alt={`${product.name} — brinquedo ${product.category.toLowerCase()} da BrinqueTEAndo`} className="h-full w-full object-cover" />
-              ) : (
-                <span className="animate-sway text-[10rem] drop-shadow-[0_24px_30px_rgba(9,38,71,0.16)] sm:text-[14rem]" aria-hidden="true">{product.emoji}</span>
-              )}
-            </div>
+            <ProductGallery productId={product.id} />
             <p className="mt-4 rounded-2xl border border-border/45 bg-white p-4 text-sm leading-6 text-text-light">
               As cores, medidas e pequenos detalhes podem variar conforme o lote. Confira sempre a faixa etária e use sob supervisão de um adulto.
             </p>
@@ -122,50 +190,63 @@ export default async function ProductPage({
             <span className="inline-flex rounded-full bg-secondary/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.17em] text-secondary">
               {product.category}
             </span>
-            <h1 className="mt-5 font-display text-5xl leading-[0.98] text-primary sm:text-6xl">{product.name}</h1>
-            <p className="mt-6 text-lg leading-8 text-text-light">{product.description}</p>
-            <p className="mt-4 text-sm leading-6 text-text-light">Selecionado para a curadoria BrinqueTEAndo por <Link href="/sobre" className="font-bold text-secondary underline underline-offset-4">Margareth Almeida, Neuropsicopedagoga</Link>.</p>
+            <h1 className="mt-5 font-display text-5xl leading-[0.98] text-primary sm:text-6xl">
+              {product.name}
+            </h1>
+            <p className="mt-6 text-lg leading-8 text-text-light">
+              {product.description}
+            </p>
+            <p className="mt-4 text-sm leading-6 text-text-light">
+              Selecionado para a curadoria BrinqueTEAndo por{" "}
+              <Link
+                href="/sobre"
+                className="font-bold text-secondary underline underline-offset-4"
+              >
+                Margareth Almeida, Neuropsicopedagoga
+              </Link>
+              .
+            </p>
 
-            <div className="mt-8 rounded-[2rem] border border-border/50 bg-white p-6 shadow-[0_20px_55px_rgba(9,38,71,0.08)] sm:p-8">
-              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-muted">Valor do produto</p>
-              <p className="mt-2 font-display text-5xl text-primary">{formatPrice(product.price)}</p>
-              <p className="mt-3 text-sm font-bold text-text-light">Pagamento seguro por cartão no checkout incorporado da Stripe.</p>
+            <ProductPurchasePanel productId={product.id} />
 
-              <div className="mt-7 flex flex-col gap-4 sm:flex-row sm:items-center">
-                <AddToCartButton productId={product.id} disabled={product.stock <= 0} />
-                <p className={`text-sm font-black ${product.stock > 0 ? "text-text-light" : "text-secondary"}`}>
-                  {product.stock > 0 ? `${product.stock} unidades disponíveis` : "Produto esgotado"}
+            <div className="mt-8 grid gap-4 sm:grid-cols-2">
+              <div className="rounded-[1.6rem] bg-background-alt p-6">
+                <span className="text-3xl" aria-hidden="true">
+                  🎈
+                </span>
+                <p className="mt-4 text-[10px] font-black uppercase tracking-[0.16em] text-secondary">
+                  Faixa etária
+                </p>
+                <p className="mt-2 font-display text-2xl text-primary">
+                  {product.ageRange}
+                </p>
+              </div>
+              <div className="rounded-[1.6rem] border border-border/45 bg-white p-6">
+                <span className="text-3xl" aria-hidden="true">
+                  🤝
+                </span>
+                <p className="mt-4 text-[10px] font-black uppercase tracking-[0.16em] text-secondary">
+                  Uso recomendado
+                </p>
+                <p className="mt-2 font-display text-2xl text-primary">
+                  Brincadeira mediada e supervisionada
                 </p>
               </div>
             </div>
 
-            <div className="mt-6">
-              <ShippingCalculator
-                cart={[{ id: product.id, quantity: 1 }]}
-                compact
-                title="Quanto custa entregar este produto?"
-              />
-            </div>
-
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-[1.6rem] bg-background-alt p-6">
-                <span className="text-3xl" aria-hidden="true">🎈</span>
-                <p className="mt-4 text-[10px] font-black uppercase tracking-[0.16em] text-secondary">Faixa etária</p>
-                <p className="mt-2 font-display text-2xl text-primary">{product.ageRange}</p>
-              </div>
-              <div className="rounded-[1.6rem] border border-border/45 bg-white p-6">
-                <span className="text-3xl" aria-hidden="true">🤝</span>
-                <p className="mt-4 text-[10px] font-black uppercase tracking-[0.16em] text-secondary">Uso recomendado</p>
-                <p className="mt-2 font-display text-2xl text-primary">Brincadeira mediada e supervisionada</p>
-              </div>
-            </div>
-
             <section className="mt-10">
-              <h2 className="font-display text-3xl text-primary">Possibilidades de exploração</h2>
+              <h2 className="font-display text-3xl text-primary">
+                Possibilidades de exploração
+              </h2>
               <ul className="mt-5 grid gap-3 sm:grid-cols-2">
                 {product.benefits.map((benefit) => (
-                  <li key={benefit} className="flex items-center gap-3 rounded-2xl border border-border/50 bg-white p-4 font-bold text-primary">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary/10 text-secondary">✓</span>
+                  <li
+                    key={benefit}
+                    className="flex items-center gap-3 rounded-2xl border border-border/50 bg-white p-4 font-bold text-primary"
+                  >
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary/10 text-secondary">
+                      ✓
+                    </span>
                     {benefit}
                   </li>
                 ))}
@@ -185,13 +266,24 @@ export default async function ProductPage({
           <section className="reveal-section mt-20 border-t border-border/50 pt-16 sm:pt-20">
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.2em] text-secondary">Você também pode gostar</p>
-                <h2 className="mt-3 font-display text-4xl text-primary sm:text-5xl">Outras possibilidades para explorar</h2>
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-secondary">
+                  Você também pode gostar
+                </p>
+                <h2 className="mt-3 font-display text-4xl text-primary sm:text-5xl">
+                  Outras possibilidades para explorar
+                </h2>
               </div>
-              <Link href="/colecoes" className="nav-link text-xs font-black uppercase tracking-[0.15em] text-secondary">Ver todos →</Link>
+              <Link
+                href="/colecoes"
+                className="nav-link text-xs font-black uppercase tracking-[0.15em] text-secondary"
+              >
+                Ver todos →
+              </Link>
             </div>
             <div className="mt-10 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
-              {relatedProducts.map((item) => <ProductCard key={item.id} product={item} />)}
+              {relatedProducts.map((item) => (
+                <ProductCard key={item.id} product={item} />
+              ))}
             </div>
           </section>
         ) : null}

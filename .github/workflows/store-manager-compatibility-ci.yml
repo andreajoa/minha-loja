@@ -1,0 +1,83 @@
+name: Store Manager Compatibility CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript
+        run: npx tsc --noEmit
+
+      - name: Verify committed managed catalog is empty
+        run: node -e 'const c=require("./src/data/store-manager-products.json"); if(c.version!==1||!Array.isArray(c.products)||c.products.length!==0) process.exit(1); console.log("managed catalog clean")'
+
+      - name: Inject ephemeral Store Manager fixture
+        run: node -e 'const fs=require("fs"); const p={id:"store-manager-ci-fixture",sourceProductId:"ci-fixture",title:"FIXTURE Store Manager Nao Publicar",slug:"fixture-store-manager",headline:"Fixture",description:"Produto sintetico usado somente no CI para validar publicacao gerenciada.",benefits:["Validacao de integracao"],cta:"Adicionar ao carrinho",price:4990,compareAtPrice:6990,currency:"BRL",image:"",gallery:[],category:"Sensorial",ageRange:"Fixture interna",stock:15,variants:[{sourceSkuId:"fixture-black-4",name:"Black 4pcs",price:4990,stock:10,attributes:{Cor:"Black",Kit:"4pcs"},imageUrl:null},{sourceSkuId:"fixture-purple-8",name:"Purple 8pcs",price:8990,stock:5,attributes:{Cor:"Purple",Kit:"8pcs"},imageUrl:null}],shipping:{weightGrams:200,lengthCm:17,widthCm:14,heightCm:4},seo:{title:"Fixture Store Manager SEO",description:"Fixture SEO somente para CI."},source:{provider:"ALIEXPRESS",productId:"ci-fixture",url:"https://example.invalid/fixture"}}; fs.writeFileSync("src/data/store-manager-products.json",JSON.stringify({version:1,products:[p]},null,2)+"\n")'
+
+      - name: Production build with managed fixture
+        run: npm run build
+
+      - name: Start isolated Next runtime
+        run: |
+          npx next dev -p 3001 > /tmp/store-manager-store-ci.log 2>&1 &
+          echo $! > /tmp/store-manager-store-ci.pid
+          for i in {1..45}; do
+            if curl -fsS http://127.0.0.1:3001/api/store-connector/manifest > /tmp/manifest.json; then
+              echo "isolated runtime ready"
+              exit 0
+            fi
+            if ! kill -0 $(cat /tmp/store-manager-store-ci.pid) 2>/dev/null; then
+              echo "isolated runtime exited early"
+              cat /tmp/store-manager-store-ci.log
+              exit 1
+            fi
+            sleep 1
+          done
+          echo "isolated runtime did not become ready"
+          cat /tmp/store-manager-store-ci.log
+          exit 1
+
+      - name: Verify connector publication contract
+        run: node -e 'const m=require("/tmp/manifest.json"); const t=m.store?.capabilities?.publicationTarget; if(m.connectorVersion!=="1.2.0"||t?.contractVersion!=="1"||t?.kind!=="github-catalog"||t?.adapter!=="github-json-catalog-v1"||t?.catalogPath!=="src/data/store-manager-products.json"||t?.editorialAssetsDir!=="public/products/catalog"||t?.preview?.provider!=="vercel"||!String(t?.preview?.projectId||"").startsWith("prj_")||!String(t?.preview?.teamId||"").startsWith("team_")) process.exit(1); console.log("publication contract verified")'
+
+      - name: Verify generated product page and variants
+        run: |
+          curl -fsS http://127.0.0.1:3001/produto/store-manager-ci-fixture > /tmp/product.html
+          grep -Fq 'FIXTURE Store Manager Nao Publicar' /tmp/product.html
+          grep -Fq 'Black 4pcs' /tmp/product.html
+          grep -Fq 'Purple 8pcs' /tmp/product.html
+          grep -Fq '49,90' /tmp/product.html
+          grep -Fq '89,90' /tmp/product.html
+          grep -Fq '10 em estoque' /tmp/product.html
+          grep -Fq '5 em estoque' /tmp/product.html
+          grep -Fq 'Fixture Store Manager SEO' /tmp/product.html
+          grep -Fq 'Fixture SEO somente para CI.' /tmp/product.html
+          grep -Fq 'https://www.brinqueteando.online/produto/store-manager-ci-fixture' /tmp/product.html
+          echo 'managed product page verified'
+
+      - name: Verify no server errors
+        if: always()
+        run: |
+          if grep -Ei 'fatal|unhandled|TypeError|ReferenceError|PrismaClient.*error' /tmp/store-manager-store-ci.log 2>/dev/null; then exit 1; fi
+          true
