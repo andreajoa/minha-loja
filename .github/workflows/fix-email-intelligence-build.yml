@@ -1,0 +1,40 @@
+name: Fix email intelligence build
+
+on:
+  push:
+    branches: [email-intelligence-dashboard]
+    paths:
+      - ".github/workflows/fix-email-intelligence-build.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: email-intelligence-dashboard
+      - name: Fix TypeScript narrowing
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path("src/lib/email-intelligence.ts")
+          s = p.read_text()
+          s = s.replace('    email_id?: string;\n    template_id?: string;', '    email_id?: string;\n    created_at?: string;\n    template_id?: string;')
+          s = s.replace('if (!domainId) throw new Error(status.error || "Domínio de envio não localizado");', 'if (!domainId) throw new Error(("error" in status && status.error) || "Domínio de envio não localizado");')
+          p.write_text(s)
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Commit fixes
+        run: |
+          git config user.name "BrinqueTEAndo Intelligence"
+          git config user.email "actions@users.noreply.github.com"
+          git add src/lib/email-intelligence.ts
+          git commit -m "fix: corrige tipagem do email intelligence" || exit 0
+          git push origin HEAD:email-intelligence-dashboard
