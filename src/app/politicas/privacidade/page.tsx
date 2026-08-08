@@ -13,6 +13,7 @@ export default function Privacidade() {
             <>
               <p>Podemos tratar dados como nome, e-mail, WhatsApp, endereço de entrega, CEP, informações do pedido, histórico de atendimento e dados técnicos necessários ao funcionamento da loja.</p>
               <p>Quando a medição de experiência é aceita, também podem ser registrados dados de jornada, como origem da visita, parâmetros de campanha, páginas visualizadas, interações com botões e links, produtos consultados, ações no carrinho e checkout, tempo ativo, profundidade de rolagem, dispositivo, navegador e localização geográfica aproximada fornecida pela infraestrutura de hospedagem.</p>
+              <p>Nas comunicações de marketing, também podemos registrar eventos operacionais e de engajamento fornecidos pela plataforma de e-mail, como envio, entrega, abertura quando tecnicamente detectável, clique em links, devolução, falha de entrega, denúncia de spam e cancelamento. Esses sinais são utilizados para melhorar relevância, frequência, conteúdo e entregabilidade.</p>
               <p>Os dados completos do cartão não são armazenados pela BrinqueTEAndo. O pagamento é processado pela Stripe em ambiente seguro.</p>
             </>
           ),
@@ -23,6 +24,7 @@ export default function Privacidade() {
             <>
               <p>A BrinqueTEAndo utiliza analytics first-party para compreender como visitantes chegam à loja, quais conteúdos e produtos despertam interesse, onde existem dificuldades na navegação e em quais etapas do funil ocorrem desistências.</p>
               <p>As jornadas são relacionadas por identificadores aleatórios de visitante e sessão. As tabelas próprias de analytics não armazenam o endereço IP bruto e não utilizam fingerprint do dispositivo para identificar uma pessoa.</p>
+              <p>Para medir o desempenho de campanhas de e-mail, podemos relacionar eventos de clique e compra com a finalidade de compreender quais mensagens contribuíram para uma conversão. Aberturas são tratadas como sinal aproximado, pois tecnologias de privacidade de provedores de e-mail podem afetar sua precisão.</p>
             </>
           ),
         },
@@ -66,6 +68,7 @@ export default function Privacidade() {
           content: (
             <>
               <p>Ao se inscrever voluntariamente em nossa newsletter, você poderá receber conteúdos, novidades, promoções e cupons. O cancelamento pode ser solicitado a qualquer momento pelos canais disponíveis na mensagem ou pelo e-mail da loja.</p>
+              <p>Para melhorar a qualidade dessas comunicações, podemos analisar métricas agregadas de entrega, abertura, clique e conversão. O objetivo é reduzir mensagens irrelevantes e aprimorar assuntos, conteúdo, ofertas e frequência.</p>
             </>
           ),
         },
