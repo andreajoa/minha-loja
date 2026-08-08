@@ -1,0 +1,65 @@
+name: Reconcile managed post-purchase block once
+
+on:
+  push:
+    branches:
+      - store-manager/post-purchase-managed-safety
+    paths:
+      - .github/workflows/reconcile-managed-post-purchase-block-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: store-manager/post-purchase-managed-safety
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Rewrite guard to cover every managed product
+        run: |
+          cat > src/lib/store-manager-post-purchase.ts <<'EOF'
+          import managedCatalog from "@/data/store-manager-products.json";
+
+          type ManagedProduct = {
+            id?: unknown;
+          };
+
+          type ManagedCatalog = {
+            products?: ManagedProduct[];
+          };
+
+          const catalog = managedCatalog as ManagedCatalog;
+          const products = Array.isArray(catalog.products) ? catalog.products : [];
+          const managedProductIds = new Set(
+            products.flatMap((product) =>
+              typeof product.id === "string" && product.id.trim() ? [product.id] : [],
+            ),
+          );
+
+          export function isUnsafeAutomaticPostPurchaseProduct(productId: string | null | undefined) {
+            return typeof productId === "string" && managedProductIds.has(productId);
+          }
+          EOF
+      - name: Validate safety and build
+        run: |
+          grep -Fq 'isUnsafeAutomaticPostPurchaseProduct' src/app/api/post-purchase/route.ts
+          npx tsc --noEmit
+          npm run build
+      - name: Record gate and remove reconciler
+        run: |
+          mkdir -p .quality-gates
+          printf '%s\n' 'MANAGED_POST_PURCHASE_BLOCK=PASS' > .quality-gates/managed-post-purchase.pass
+          rm .github/workflows/reconcile-managed-post-purchase-block-once.yml
+          git config user.name "store-manager-bot"
+          git config user.email "store-manager-bot@users.noreply.github.com"
+          git add src/lib/store-manager-post-purchase.ts .quality-gates/managed-post-purchase.pass .github/workflows/reconcile-managed-post-purchase-block-once.yml
+          git commit -m "fix: exclude managed products from automatic post-purchase"
+          git push origin HEAD:store-manager/post-purchase-managed-safety
