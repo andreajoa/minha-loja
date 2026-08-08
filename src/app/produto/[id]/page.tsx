@@ -5,6 +5,7 @@ import AddToCartButton from "@/components/AddToCartButton";
 import ProductCard from "@/components/ProductCard";
 import ShippingCalculator from "@/components/ShippingCalculator";
 import { formatPrice, products } from "@/data/products";
+import { SITE_URL, breadcrumbJsonLd, jsonLd } from "@/lib/seo";
 
 export function generateStaticParams() {
   return products.map((product) => ({ id: product.id }));
@@ -18,11 +19,28 @@ export async function generateMetadata({
   const { id } = await params;
   const product = products.find((item) => item.id === id);
 
-  if (!product) return { title: "Produto não encontrado" };
+  if (!product) return { title: "Produto não encontrado", robots: { index: false, follow: false } };
+
+  const canonical = `/produto/${product.id}`;
+  const description = `${product.description} ${product.ageRange}. Curadoria BrinqueTEAndo por Margareth Almeida, Neuropsicopedagoga.`;
 
   return {
     title: product.name,
-    description: product.description,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      title: `${product.name} | BrinqueTEAndo`,
+      description,
+      url: canonical,
+      type: "website",
+      images: product.image ? [{ url: product.image, alt: product.name }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${product.name} | BrinqueTEAndo`,
+      description,
+      images: product.image ? [product.image] : undefined,
+    },
   };
 }
 
@@ -38,9 +56,46 @@ export default async function ProductPage({
 
   const related = products.filter((item) => item.id !== product.id && item.category === product.category).slice(0, 3);
   const relatedProducts = related.length > 0 ? related : products.filter((item) => item.id !== product.id).slice(0, 3);
+  const productUrl = `${SITE_URL}/produto/${product.id}`;
+  const images = product.gallery?.length ? product.gallery : product.image ? [product.image] : [];
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "@id": `${productUrl}#product`,
+    name: product.name,
+    description: product.description,
+    sku: product.id,
+    category: product.category,
+    image: images.map((image) => `${SITE_URL}${image}`),
+    brand: { "@type": "Brand", name: "BrinqueTEAndo" },
+    audience: {
+      "@type": "PeopleAudience",
+      audienceType: "Crianças e famílias",
+    },
+    additionalProperty: [
+      { "@type": "PropertyValue", name: "Faixa etária", value: product.ageRange },
+      ...product.benefits.map((benefit) => ({ "@type": "PropertyValue", name: "Possibilidade de exploração", value: benefit })),
+    ],
+    offers: {
+      "@type": "Offer",
+      url: productUrl,
+      priceCurrency: "BRL",
+      price: (product.price / 100).toFixed(2),
+      availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      itemCondition: "https://schema.org/NewCondition",
+      seller: { "@id": `${SITE_URL}/#organization` },
+    },
+  };
+  const breadcrumb = breadcrumbJsonLd([
+    { name: "Início", path: "/" },
+    { name: "Coleções", path: "/colecoes" },
+    { name: product.name, path: `/produto/${product.id}` },
+  ]);
 
   return (
     <div className="bg-background">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(productJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(breadcrumb) }} />
       <div className="mx-auto max-w-7xl px-5 py-10 sm:py-16">
         <Link href="/colecoes" className="nav-link inline-flex text-xs font-black uppercase tracking-[0.15em] text-secondary">
           ← Voltar para os produtos
@@ -53,7 +108,7 @@ export default async function ProductPage({
               <div className="absolute right-8 top-8 animate-float text-4xl text-secondary-light" aria-hidden="true">✦</div>
               <div className="absolute bottom-10 left-8 animate-float-slow text-4xl" aria-hidden="true">♡</div>
               {product.image ? (
-                <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
+                <img src={product.image} alt={`${product.name} — brinquedo ${product.category.toLowerCase()} da BrinqueTEAndo`} className="h-full w-full object-cover" />
               ) : (
                 <span className="animate-sway text-[10rem] drop-shadow-[0_24px_30px_rgba(9,38,71,0.16)] sm:text-[14rem]" aria-hidden="true">{product.emoji}</span>
               )}
@@ -69,6 +124,7 @@ export default async function ProductPage({
             </span>
             <h1 className="mt-5 font-display text-5xl leading-[0.98] text-primary sm:text-6xl">{product.name}</h1>
             <p className="mt-6 text-lg leading-8 text-text-light">{product.description}</p>
+            <p className="mt-4 text-sm leading-6 text-text-light">Selecionado para a curadoria BrinqueTEAndo por <Link href="/sobre" className="font-bold text-secondary underline underline-offset-4">Margareth Almeida, Neuropsicopedagoga</Link>.</p>
 
             <div className="mt-8 rounded-[2rem] border border-border/50 bg-white p-6 shadow-[0_20px_55px_rgba(9,38,71,0.08)] sm:p-8">
               <p className="text-[10px] font-black uppercase tracking-[0.16em] text-muted">Valor do produto</p>
