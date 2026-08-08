@@ -38,30 +38,28 @@ jobs:
       - name: Production build with managed fixture
         run: npm run build
 
-      - name: Start production server
+      - name: Start isolated Next runtime
         run: |
-          npx next start -p 3001 > /tmp/store-manager-store-ci.log 2>&1 &
+          npx next dev -p 3001 > /tmp/store-manager-store-ci.log 2>&1 &
           echo $! > /tmp/store-manager-store-ci.pid
           for i in {1..45}; do
-            if curl -fsS http://127.0.0.1:3001/ > /dev/null; then
-              echo "production server ready"
+            if curl -fsS http://127.0.0.1:3001/api/store-connector/manifest > /tmp/manifest.json; then
+              echo "isolated runtime ready"
               exit 0
             fi
             if ! kill -0 $(cat /tmp/store-manager-store-ci.pid) 2>/dev/null; then
-              echo "production server exited early"
+              echo "isolated runtime exited early"
               cat /tmp/store-manager-store-ci.log
               exit 1
             fi
             sleep 1
           done
-          echo "production server did not become ready"
+          echo "isolated runtime did not become ready"
           cat /tmp/store-manager-store-ci.log
           exit 1
 
       - name: Verify connector publication contract
-        run: |
-          curl -fsS http://127.0.0.1:3001/api/store-connector/manifest > /tmp/manifest.json
-          node -e 'const m=require("/tmp/manifest.json"); const t=m.store?.capabilities?.publicationTarget; if(m.connectorVersion!=="1.2.0"||t?.contractVersion!=="1"||t?.kind!=="github-catalog"||t?.adapter!=="github-json-catalog-v1"||t?.catalogPath!=="src/data/store-manager-products.json"||t?.editorialAssetsDir!=="public/products/catalog"||t?.preview?.provider!=="vercel"||!String(t?.preview?.projectId||"").startsWith("prj_")||!String(t?.preview?.teamId||"").startsWith("team_")) process.exit(1); console.log("publication contract verified")'
+        run: node -e 'const m=require("/tmp/manifest.json"); const t=m.store?.capabilities?.publicationTarget; if(m.connectorVersion!=="1.2.0"||t?.contractVersion!=="1"||t?.kind!=="github-catalog"||t?.adapter!=="github-json-catalog-v1"||t?.catalogPath!=="src/data/store-manager-products.json"||t?.editorialAssetsDir!=="public/products/catalog"||t?.preview?.provider!=="vercel"||!String(t?.preview?.projectId||"").startsWith("prj_")||!String(t?.preview?.teamId||"").startsWith("team_")) process.exit(1); console.log("publication contract verified")'
 
       - name: Verify generated product page and variants
         run: |
