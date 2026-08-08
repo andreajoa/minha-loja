@@ -1,0 +1,59 @@
+name: Reconcile checkout reservation once
+
+on:
+  push:
+    branches:
+      - store-manager/checkout-stock-reservation
+    paths:
+      - .github/workflows/reconcile-checkout-reservation-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: store-manager/checkout-stock-reservation
+      - name: Wire reservation into checkout
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('src/app/api/checkout/route.ts')
+          t=p.read_text()
+          old='''import { BASE_PATH } from "@/lib/paths";'''
+          new='''import { BASE_PATH } from "@/lib/paths";\nimport {\n  releaseManagedCheckoutReservation,\n  reserveManagedCheckout,\n} from "@/lib/store-manager-reservations";'''
+          assert old in t
+          t=t.replace(old,new,1)
+          old='''    const normalizedCart = normalizeCart(payload.cart);\n    const stripe = new Stripe(stripeSecretKey);'''
+          new='''    const normalizedCart = normalizeCart(payload.cart);\n    const reservation = await reserveManagedCheckout(normalizedCart);\n    const stripe = new Stripe(stripeSecretKey);'''
+          assert old in t
+          t=t.replace(old,new,1)
+          old='''    const session = await stripe.checkout.sessions.create({'''
+          new='''    let session: Stripe.Checkout.Session;\n    try {\n      session = await stripe.checkout.sessions.create({'''
+          assert old in t
+          t=t.replace(old,new,1)
+          old='''      shipping_address_collection: { allowed_countries: ["BR"] },'''
+          new='''      shipping_address_collection: { allowed_countries: ["US", "CA", "GB", "AU", "NZ"] },'''
+          assert old in t
+          t=t.replace(old,new,1)
+          old='''      success_url: `${appUrl}/sucesso?session_id={CHECKOUT_SESSION_ID}`,\n      cancel_url: `${appUrl}/carrinho`,\n      metadata: {\n        store: "brinqueteando",\n        cart: serializeCart(payload.cart),\n      },\n    });'''
+          new='''      success_url: `${appUrl}/sucesso?session_id={CHECKOUT_SESSION_ID}`,\n      cancel_url: `${appUrl}/carrinho`,\n      ...(reservation.checkoutExpiresAt\n        ? { expires_at: Math.floor(reservation.checkoutExpiresAt.getTime() / 1000) }\n        : {}),\n      metadata: {\n        store: "brinqueteando",\n        cart: serializeCart(payload.cart),\n        ...(reservation.reservationId\n          ? { store_manager_reservation_id: reservation.reservationId }\n          : {}),\n      },\n      payment_intent_data: {\n        metadata: {\n          store: "brinqueteando",\n          ...(reservation.reservationId\n            ? { store_manager_reservation_id: reservation.reservationId }\n            : {}),\n        },\n      },\n    });\n    } catch (error) {\n      await releaseManagedCheckoutReservation(reservation.reservationId);\n      throw error;\n    }'''
+          assert old in t
+          t=t.replace(old,new,1)
+          old='''    if (!session.url) {\n      return NextResponse.json('''
+          new='''    if (!session.url) {\n      await releaseManagedCheckoutReservation(reservation.reservationId);\n      return NextResponse.json('''
+          assert old in t
+          p.write_text(t.replace(old,new,1))
+          PY
+      - name: Commit
+        run: |
+          rm .github/workflows/reconcile-checkout-reservation-once.yml
+          git config user.name "store-manager-bot"
+          git config user.email "store-manager-bot@users.noreply.github.com"
+          git add src/app/api/checkout/route.ts .github/workflows/reconcile-checkout-reservation-once.yml
+          git commit -m "feat: reserve managed inventory before Stripe checkout"
+          git push origin HEAD:store-manager/checkout-stock-reservation
