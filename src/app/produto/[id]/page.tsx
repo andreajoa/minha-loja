@@ -6,6 +6,7 @@ import ProductGallery from "@/components/ProductGallery";
 import ProductPurchasePanel from "@/components/ProductPurchasePanel";
 import managedCatalogJson from "@/data/store-manager-products.json";
 import { products } from "@/data/products";
+import { SITE_URL, breadcrumbJsonLd, jsonLd } from "@/lib/seo";
 
 type ManagedSeoProduct = {
   id: string;
@@ -34,36 +35,38 @@ export async function generateMetadata({
   const { id } = await params;
   const product = products.find((item) => item.id === id);
 
-  if (!product) return { title: "Produto não encontrado" };
+  if (!product) {
+    return {
+      title: "Produto não encontrado",
+      robots: { index: false, follow: false },
+    };
+  }
 
   const managedSeo = managedSeoFor(product.id);
   const seoTitle = managedSeo?.title?.trim() || product.name;
-  const seoDescription = managedSeo?.description?.trim() || product.description;
-  const productPath = `/produto/${encodeURIComponent(product.id)}`;
-  const socialImages = product.image
-    ? [{ url: product.image, alt: product.name }]
-    : undefined;
+  const seoDescription =
+    managedSeo?.description?.trim() ||
+    `${product.description} ${product.ageRange}. Curadoria BrinqueTEAndo por Margareth Almeida, Neuropsicopedagoga.`;
+  const canonical = `/produto/${encodeURIComponent(product.id)}`;
 
   return {
     title: seoTitle,
     description: seoDescription,
-    alternates: {
-      canonical: productPath,
-    },
+    alternates: { canonical },
     openGraph: {
-      title: seoTitle,
+      title: `${seoTitle} | BrinqueTEAndo`,
       description: seoDescription,
-      url: productPath,
+      url: canonical,
       siteName: "BrinqueTEAndo",
       locale: "pt_BR",
       type: "website",
-      ...(socialImages ? { images: socialImages } : {}),
+      images: product.image ? [{ url: product.image, alt: product.name }] : undefined,
     },
     twitter: {
-      card: socialImages ? "summary_large_image" : "summary",
-      title: seoTitle,
+      card: product.image ? "summary_large_image" : "summary",
+      title: `${seoTitle} | BrinqueTEAndo`,
       description: seoDescription,
-      ...(socialImages ? { images: socialImages.map((image) => image.url) } : {}),
+      images: product.image ? [product.image] : undefined,
     },
   };
 }
@@ -85,9 +88,88 @@ export default async function ProductPage({
     related.length > 0
       ? related
       : products.filter((item) => item.id !== product.id).slice(0, 3);
+  const productUrl = `${SITE_URL}/produto/${encodeURIComponent(product.id)}`;
+  const images = product.gallery?.length
+    ? product.gallery
+    : product.image
+      ? [product.image]
+      : [];
+  const absoluteImages = images.map((image) =>
+    /^https?:\/\//i.test(image) ? image : `${SITE_URL}${image}`,
+  );
+  const variants = product.variants || [];
+  const offers = variants.length > 0
+    ? variants.map((variant) => ({
+        "@type": "Offer",
+        sku: variant.sourceSkuId || `${product.id}-${variant.name}`,
+        name: `${product.name} · ${variant.name}`,
+        url: productUrl,
+        priceCurrency: "BRL",
+        price: (variant.price / 100).toFixed(2),
+        availability:
+          variant.stock > 0
+            ? "https://schema.org/InStock"
+            : "https://schema.org/OutOfStock",
+        itemCondition: "https://schema.org/NewCondition",
+        seller: { "@id": `${SITE_URL}/#organization` },
+      }))
+    : {
+        "@type": "Offer",
+        url: productUrl,
+        priceCurrency: "BRL",
+        price: (product.price / 100).toFixed(2),
+        availability:
+          product.stock > 0
+            ? "https://schema.org/InStock"
+            : "https://schema.org/OutOfStock",
+        itemCondition: "https://schema.org/NewCondition",
+        seller: { "@id": `${SITE_URL}/#organization` },
+      };
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "@id": `${productUrl}#product`,
+    name: product.name,
+    description: product.description,
+    sku: product.id,
+    category: product.category,
+    image: absoluteImages,
+    brand: { "@type": "Brand", name: "BrinqueTEAndo" },
+    audience: {
+      "@type": "PeopleAudience",
+      audienceType: "Crianças e famílias",
+    },
+    additionalProperty: [
+      {
+        "@type": "PropertyValue",
+        name: "Faixa etária",
+        value: product.ageRange,
+      },
+      ...product.benefits.map((benefit) => ({
+        "@type": "PropertyValue",
+        name: "Possibilidade de exploração",
+        value: benefit,
+      })),
+    ],
+    offers,
+  };
+  const breadcrumb = breadcrumbJsonLd([
+    { name: "Início", path: "/" },
+    { name: "Coleções", path: "/colecoes" },
+    { name: product.name, path: `/produto/${product.id}` },
+  ]);
 
   return (
     <div className="bg-background">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd(productJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd(breadcrumb) }}
+      />
+
       <div className="mx-auto max-w-7xl px-5 py-10 sm:py-16">
         <Link
           href="/colecoes"
@@ -113,6 +195,16 @@ export default async function ProductPage({
             </h1>
             <p className="mt-6 text-lg leading-8 text-text-light">
               {product.description}
+            </p>
+            <p className="mt-4 text-sm leading-6 text-text-light">
+              Selecionado para a curadoria BrinqueTEAndo por{" "}
+              <Link
+                href="/sobre"
+                className="font-bold text-secondary underline underline-offset-4"
+              >
+                Margareth Almeida, Neuropsicopedagoga
+              </Link>
+              .
             </p>
 
             <ProductPurchasePanel productId={product.id} />
