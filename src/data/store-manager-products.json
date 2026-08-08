@@ -1,4 +1,65 @@
 {
   "version": 1,
-  "products": []
+  "products": [
+    {
+      "id": "store-manager-preview-fixture",
+      "sourceProductId": "fixture-only",
+      "title": "FIXTURE Store Manager — Não Publicar",
+      "slug": "fixture-store-manager",
+      "headline": "Produto sintético para validar a integração",
+      "description": "Fixture temporária usada somente no Preview para validar página, variantes, preço e estoque do catálogo gerenciado.",
+      "benefits": [
+        "Validação de integração",
+        "Teste de variantes"
+      ],
+      "cta": "Adicionar ao carrinho",
+      "price": 4990,
+      "compareAtPrice": 6990,
+      "currency": "BRL",
+      "image": "",
+      "gallery": [],
+      "category": "Sensorial",
+      "ageRange": "Fixture interna — não comercial",
+      "stock": 15,
+      "variants": [
+        {
+          "sourceSkuId": "fixture-black-4",
+          "name": "Black 4pcs",
+          "price": 4990,
+          "stock": 10,
+          "attributes": {
+            "Cor": "Black",
+            "Kit": "4pcs"
+          },
+          "imageUrl": null
+        },
+        {
+          "sourceSkuId": "fixture-purple-8",
+          "name": "Purple 8pcs",
+          "price": 8990,
+          "stock": 5,
+          "attributes": {
+            "Cor": "Purple",
+            "Kit": "8pcs"
+          },
+          "imageUrl": null
+        }
+      ],
+      "shipping": {
+        "weightGrams": 200,
+        "lengthCm": 17,
+        "widthCm": 14,
+        "heightCm": 4
+      },
+      "seo": {
+        "title": "Fixture Store Manager",
+        "description": "Fixture temporária de integração."
+      },
+      "source": {
+        "provider": "ALIEXPRESS",
+        "productId": "fixture-only",
+        "url": "https://example.invalid/fixture"
+      }
+    }
+  ]
 }
