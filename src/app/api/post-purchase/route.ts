@@ -8,6 +8,7 @@ import {
 } from "@/lib/commerce";
 import { products } from "@/data/products";
 import { BASE_PATH } from "@/lib/paths";
+import { isUnsafeAutomaticPostPurchaseProduct } from "@/lib/store-manager-post-purchase";
 
 export const runtime = "nodejs";
 
@@ -63,7 +64,9 @@ async function createFallbackCheckout({
   productId: string;
 }) {
   const product = products.find((item) => item.id === productId);
-  if (!product) throw new Error("Produto da oferta não encontrado.");
+  if (!product || isUnsafeAutomaticPostPurchaseProduct(product.id)) {
+    throw new Error("Produto da oferta não está disponível neste fluxo pós-compra.");
+  }
   const offerPrice = applyPercentDiscount(product.price, OFFER_PERCENT);
   const customer = customerId(originalSession);
   const appUrl = appUrlFor(req);
@@ -141,8 +144,11 @@ export async function POST(req: Request) {
     const ageSeconds = Math.floor(Date.now() / 1000) - session.created;
     const expired = ageSeconds > OFFER_WINDOW_SECONDS;
     const purchasedIds = parseSerializedCart(session.metadata?.cart).map((line) => line.id);
-    const recommendations = getPostPurchaseRecommendations(purchasedIds, 4);
-    const offerProduct = recommendations[0] || null;
+    const recommendations = getPostPurchaseRecommendations(purchasedIds, 8)
+      .filter((product) => !isUnsafeAutomaticPostPurchaseProduct(product.id))
+      .slice(0, 4);
+    const recommendedProductCandidate = recommendations[0] || null;
+    const offerProduct = recommendedProductCandidate;
     const claimed = session.metadata?.postPurchaseOfferClaimed === "true";
     const viewed = session.metadata?.postPurchaseOfferViewed === "true";
 
@@ -205,7 +211,7 @@ export async function POST(req: Request) {
     }
 
     const product = products.find((item) => item.id === payload.productId);
-    if (!product || product.stock <= 0) {
+    if (!product || isUnsafeAutomaticPostPurchaseProduct(product.id) || product.stock <= 0) {
       return NextResponse.json({ error: "O produto da oferta ficou indisponível." }, { status: 409 });
     }
 
