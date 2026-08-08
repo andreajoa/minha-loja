@@ -47,7 +47,7 @@ export async function POST(req: Request) {
 
     const normalizedCart = normalizeCart(payload.cart);
     const subtotal = normalizedCart.reduce(
-      (total, line) => total + line.product.price * line.quantity,
+      (total, line) => total + line.unitPrice * line.quantity,
       0,
     );
     const couponCode =
@@ -83,8 +83,12 @@ export async function POST(req: Request) {
     const cookieStore = await cookies();
     const marketingEmail = cookieStore.get("bt_marketing_email")?.value || "";
     const marketingToken = cookieStore.get("bt_marketing_token")?.value || "";
-    const analyticsSessionId = safeAnalyticsId(cookieStore.get("bt_analytics_session")?.value || "");
-    const analyticsVisitorId = safeAnalyticsId(cookieStore.get("bt_analytics_visitor")?.value || "");
+    const analyticsSessionId = safeAnalyticsId(
+      cookieStore.get("bt_analytics_session")?.value || "",
+    );
+    const analyticsVisitorId = safeAnalyticsId(
+      cookieStore.get("bt_analytics_visitor")?.value || "",
+    );
     const canRecover = Boolean(
       marketingEmail && verifyMarketingToken(marketingToken, marketingEmail),
     );
@@ -126,29 +130,37 @@ export async function POST(req: Request) {
             "Revise o endereço, o WhatsApp e os dados do pedido antes de concluir o pagamento.",
         },
       },
-      line_items: normalizedCart.map(({ product, quantity }) => {
-        const discountedUnitAmount = applyPercentDiscount(
-          product.price,
-          discount.tier.percent,
-        );
-        return {
-          price_data: {
-            currency: "brl",
-            product_data: {
-              name: product.name,
-              description: discountDescription
-                ? `${product.description} ${discountDescription}`
-                : product.description,
-              metadata: {
-                productId: product.id,
-                originalUnitAmount: String(product.price),
+      line_items: normalizedCart.map(
+        ({ product, variant, variantId, unitPrice, quantity }) => {
+          const discountedUnitAmount = applyPercentDiscount(
+            unitPrice,
+            discount.tier.percent,
+          );
+          const displayName = variant
+            ? `${product.name} · ${variant.name}`
+            : product.name;
+
+          return {
+            price_data: {
+              currency: "brl",
+              product_data: {
+                name: displayName,
+                description: discountDescription
+                  ? `${product.description} ${discountDescription}`
+                  : product.description,
+                metadata: {
+                  productId: product.id,
+                  variantId: variantId || "",
+                  variantName: variant?.name || "",
+                  originalUnitAmount: String(unitPrice),
+                },
               },
+              unit_amount: discountedUnitAmount,
             },
-            unit_amount: discountedUnitAmount,
-          },
-          quantity,
-        };
-      }),
+            quantity,
+          };
+        },
+      ),
       shipping_options: [
         {
           shipping_rate_data: {
@@ -221,7 +233,9 @@ export async function POST(req: Request) {
           email: marketingEmail,
           payload: { reason: "checkout_started" },
         });
-        if (stopCart.error) console.error("Cart recovery stop at checkout:", stopCart.error);
+        if (stopCart.error) {
+          console.error("Cart recovery stop at checkout:", stopCart.error);
+        }
 
         const startCheckout = await resend.events.send({
           event: "checkout.recovery_started",
@@ -234,7 +248,9 @@ export async function POST(req: Request) {
             cartTotal: formatMoney(discount.totalAfterDiscount + shipping.amount),
           },
         });
-        if (startCheckout.error) console.error("Checkout recovery event:", startCheckout.error);
+        if (startCheckout.error) {
+          console.error("Checkout recovery event:", startCheckout.error);
+        }
       } catch (marketingError) {
         console.error("Checkout recovery exception:", marketingError);
       }
