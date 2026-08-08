@@ -81,6 +81,7 @@ type ResendWebhookEvent = {
   created_at?: string;
   data?: {
     email_id?: string;
+    created_at?: string;
     template_id?: string;
     broadcast_id?: string;
     subject?: string;
@@ -256,7 +257,7 @@ export async function enableResendOpenClickTracking() {
   if (!resend) throw new Error("RESEND_API_KEY ausente");
   const status = await getResendTrackingStatus();
   const domainId = (status as typeof status & { domainId?: string }).domainId;
-  if (!domainId) throw new Error(status.error || "Domínio de envio não localizado");
+  if (!domainId) throw new Error(("error" in status && status.error) || "Domínio de envio não localizado");
   const api = resend as unknown as {
     domains: { update: (payload: { id: string; openTracking: boolean; clickTracking: boolean; trackingSubdomain: string }) => Promise<any> };
   };
