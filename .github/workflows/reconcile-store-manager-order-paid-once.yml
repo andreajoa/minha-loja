@@ -1,0 +1,56 @@
+name: Reconcile Store Manager order sender once
+
+on:
+  push:
+    branches:
+      - store-manager/order-paid-webhook
+    paths:
+      - .github/workflows/reconcile-store-manager-order-paid-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: store-manager/order-paid-webhook
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Patch Stripe webhook safely
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const path = 'src/app/api/webhook/route.ts';
+          let s = fs.readFileSync(path, 'utf8');
+          const importNeedle = 'import { claimOwnerSaleAlertEvent, verifyOwnerSaleAlertEvent } from "@/lib/email/trust";';
+          if (!s.includes(importNeedle)) throw new Error('Import anchor not found');
+          if (!s.includes('pushPaidCheckoutToStoreManager')) {
+            s = s.replace(importNeedle, importNeedle + '\nimport { pushPaidCheckoutToStoreManager } from "@/lib/store-manager-orders";');
+          }
+          const anchor = '      await cleanupRecoveryState(sessionMetadata, checkoutSession.id);';
+          if (!s.includes(anchor)) throw new Error('cleanupRecoveryState anchor not found');
+          if (!s.includes('Store Manager order push failed')) {
+            const block = `      try {\n        const managerPush = await pushPaidCheckoutToStoreManager({\n          stripe,\n          session: checkoutSession,\n          stripeEventId: event.id,\n          stripeEventCreated: event.created,\n        });\n        if (managerPush.sent) {\n          console.info("Store Manager order.paid delivered", {\n            sessionId: checkoutSession.id,\n            scope: managerPush.scope,\n          });\n        }\n      } catch (managerError) {\n        console.error(\n          "Store Manager order push failed",\n          managerError instanceof Error ? managerError.message : managerError,\n        );\n      }\n\n`;
+            s = s.replace(anchor, block + anchor);
+          }
+          fs.writeFileSync(path, s);
+          NODE
+      - name: Validate TypeScript and build
+        run: |
+          npm ci
+          npx tsc --noEmit
+          npm run build
+      - name: Remove one-shot workflow and commit
+        run: |
+          rm .github/workflows/reconcile-store-manager-order-paid-once.yml
+          git config user.name "store-manager-bot"
+          git config user.email "store-manager-bot@users.noreply.github.com"
+          git add src/app/api/webhook/route.ts src/lib/store-manager-managed.ts src/lib/store-manager-orders.ts .github/workflows/reconcile-store-manager-order-paid-once.yml
+          git diff --cached --quiet && exit 0
+          git commit -m "feat: emit paid managed orders to Store Manager"
+          git push origin HEAD:store-manager/order-paid-webhook
