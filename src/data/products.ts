@@ -1,4 +1,11 @@
-export type ProductVariant = { name: string; stock: number; price: number };
+export type ProductVariant = {
+  sourceSkuId?: string;
+  name: string;
+  stock: number;
+  price: number;
+  attributes?: Record<string, string>;
+  image?: string | null;
+};
 
 export type Product = {
   id: string;
@@ -342,6 +349,132 @@ export const products: Product[] = [
     ageRange: "A partir de 3 anos",
     benefits: ["Exploração tátil", "Coordenação das mãos", "Brincadeira imaginativa"],
     shipping: { weightGrams: 250, lengthCm: 18, widthCm: 15, heightCm: 12 },
+  },
+
+  {
+    id: "ae-3256810332224371",
+    name: "Brinquedo Magnético EDC Fidget Toy - Kits com 4 ou 8 Peças",
+    description: "Brinquedo magnético estilo EDC composto por esferas magnéticas. Escolha entre kits de 4 ou 8 peças nas cores preta, roxa, verde ou rosa.",
+    price: 4890,
+
+    image: "/products/catalog/ae-3256810332224371/originais/01.webp",
+
+    gallery: [
+      "/products/catalog/ae-3256810332224371/originais/01.webp",
+      "/products/catalog/ae-3256810332224371/originais/02.webp",
+      "/products/catalog/ae-3256810332224371/originais/03.webp",
+      "/products/catalog/ae-3256810332224371/originais/04.webp",
+      "/products/catalog/ae-3256810332224371/originais/05.webp",
+      "/products/catalog/ae-3256810332224371/originais/06.webp",
+      "/products/catalog/ae-3256810332224371/editoriais/lifestyle.png",
+      "/products/catalog/ae-3256810332224371/editoriais/produto-em-uso.png",
+      "/products/catalog/ae-3256810332224371/editoriais/cena-premium.png",
+      "/products/catalog/ae-3256810332224371/editoriais/detalhe-contextual.png",
+    ],
+
+    variants: [
+      {
+        sourceSkuId: "12000052674809549",
+        name: "Preto - 4 peças",
+        price: 4890,
+        stock: 40,
+        attributes: {
+          Color: "Black - 4pcs",
+        },
+        image: "https://ae01.alicdn.com/kf/S462dbe22e2d1456f8f0928a1e28b341eA.png",
+      },
+      {
+        sourceSkuId: "12000052674809550",
+        name: "Roxo - 4 peças",
+        price: 4890,
+        stock: 65,
+        attributes: {
+          Color: "Purple - 4pcs",
+        },
+        image: "https://ae01.alicdn.com/kf/S1fdfac105a084ac3a90a2553a3ea5cbcO.jpg",
+      },
+      {
+        sourceSkuId: "12000052674809551",
+        name: "Verde - 4 peças",
+        price: 4890,
+        stock: 46,
+        attributes: {
+          Color: "Green - 4pcs",
+        },
+        image: "https://ae01.alicdn.com/kf/S9252f1dceba740fe9d4ad0b1199a52c4M.jpg",
+      },
+      {
+        sourceSkuId: "12000052674809552",
+        name: "Rosa - 4 peças",
+        price: 4990,
+        stock: 34,
+        attributes: {
+          Color: "Pink - 4pcs",
+        },
+        image: "https://ae01.alicdn.com/kf/Sc219c40f32e64552a481d035713de557f.png",
+      },
+      {
+        sourceSkuId: "12000052674809553",
+        name: "Preto - 8 peças",
+        price: 8790,
+        stock: 12,
+        attributes: {
+          Color: "Black - 8pcs",
+        },
+        image: "https://ae01.alicdn.com/kf/S1ab62f336aaf4e789225f43030ed86edd.png",
+      },
+      {
+        sourceSkuId: "12000052674809554",
+        name: "Roxo - 8 peças",
+        price: 8890,
+        stock: 43,
+        attributes: {
+          Color: "Purple - 8pcs",
+        },
+        image: "https://ae01.alicdn.com/kf/S9795762cd545467695e94278bd97fa39J.jpg",
+      },
+      {
+        sourceSkuId: "12000052674809555",
+        name: "Verde - 8 peças",
+        price: 8790,
+        stock: 61,
+        attributes: {
+          Color: "Green - 8pcs",
+        },
+        image: "https://ae01.alicdn.com/kf/S82df7bc8209249d4a0c22c001e0fc2b53.jpg",
+      },
+      {
+        sourceSkuId: "12000052674809556",
+        name: "Rosa - 8 peças",
+        price: 8790,
+        stock: 13,
+        attributes: {
+          Color: "Pink - 8pcs",
+        },
+        image: "https://ae01.alicdn.com/kf/Sa99699c432c5460fa116db69699fac89b.png",
+      },
+    ],
+
+    emoji: "🧲",
+    category: "Sensorial",
+    stock: 314,
+
+    // TEMPORÁRIO: deve ser definido antes de qualquer merge em produção.
+    ageRange: "A confirmar antes da publicação",
+
+    benefits: [
+      "Opções de kits com 4 ou 8 peças",
+      "Disponível nas cores preta, roxa, verde e rosa",
+      "Esferas com propriedades magnéticas",
+      "Embalagem com dimensões de 14 cm x 4 cm x 17 cm e peso de 0,185 kg",
+    ],
+
+    shipping: {
+      weightGrams: 185,
+      lengthCm: 17,
+      widthCm: 14,
+      heightCm: 4,
+    },
   },
 ];
 

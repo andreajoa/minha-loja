@@ -14,6 +14,7 @@ import {
   getDownsell,
   getOrderBump,
   getUpsell,
+  variantIdFor,
 } from "@/lib/commerce";
 import type { ShippingOption, ShippingQuote } from "@/lib/shipping-server";
 import { withBasePath } from "@/lib/paths";
@@ -116,14 +117,32 @@ export default function CarrinhoPage() {
       items
         .map((item) => {
           const product = products.find((candidate) => candidate.id === item.id);
-          return product ? { ...item, product } : null;
+          if (!product) return null;
+
+          const variant =
+            item.variantId && product.variants?.length
+              ? product.variants.find(
+                  (candidate) =>
+                    variantIdFor(product, candidate) === item.variantId,
+                )
+              : undefined;
+          const unitPrice = variant ? variant.price : product.price;
+          const availableStock = variant ? variant.stock : product.stock;
+
+          return {
+            ...item,
+            product,
+            variant,
+            unitPrice,
+            availableStock,
+          };
         })
         .filter((item): item is NonNullable<typeof item> => Boolean(item)),
     [items],
   );
 
   const subtotal = detailedItems.reduce(
-    (total, item) => total + item.product.price * item.quantity,
+    (total, item) => total + item.unitPrice * item.quantity,
     0,
   );
   const discount = calculateDiscount(subtotal, couponCode);
@@ -240,75 +259,82 @@ export default function CarrinhoPage() {
 
         <div className="mt-8 grid items-start gap-8 lg:grid-cols-[1fr_400px]">
           <div className="space-y-5">
-            {detailedItems.map(({ product, quantity }) => (
-              <article
-                key={product.id}
-                className="grid gap-5 rounded-[2rem] border border-border/50 bg-white p-5 shadow-[0_16px_42px_rgba(9,38,71,0.06)] sm:grid-cols-[128px_1fr]"
-              >
-                <ProductVisual product={product} />
+            {detailedItems.map(
+              ({ product, variant, variantId, quantity, unitPrice, availableStock }) => (
+                <article
+                  key={`${product.id}:${variantId || "base"}`}
+                  className="grid gap-5 rounded-[2rem] border border-border/50 bg-white p-5 shadow-[0_16px_42px_rgba(9,38,71,0.06)] sm:grid-cols-[128px_1fr]"
+                >
+                  <ProductVisual product={product} />
 
-                <div className="flex min-w-0 flex-col justify-between gap-5 sm:flex-row sm:items-center">
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.15em] text-secondary">
-                      {product.category}
-                    </p>
-                    <Link
-                      href={`/produto/${product.id}`}
-                      className="mt-1 block font-display text-3xl leading-none text-primary transition hover:text-secondary"
-                    >
-                      {product.name}
-                    </Link>
-                    <p className="mt-3 text-sm text-text-light">
-                      {formatPrice(product.price)} por unidade
-                    </p>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-3 sm:justify-end">
-                    <div className="inline-flex items-center rounded-full border border-border/60 bg-background p-1">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          updateQuantity(product.id, quantity - 1)
-                        }
-                        className="flex h-9 w-9 items-center justify-center rounded-full font-black text-primary transition hover:bg-white"
-                        aria-label={`Diminuir quantidade de ${product.name}`}
+                  <div className="flex min-w-0 flex-col justify-between gap-5 sm:flex-row sm:items-center">
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.15em] text-secondary">
+                        {product.category}
+                      </p>
+                      <Link
+                        href={`/produto/${product.id}`}
+                        className="mt-1 block font-display text-3xl leading-none text-primary transition hover:text-secondary"
                       >
-                        −
-                      </button>
-                      <span
-                        className="min-w-10 text-center font-black text-primary"
-                        aria-live="polite"
-                      >
-                        {quantity}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          updateQuantity(product.id, quantity + 1)
-                        }
-                        disabled={quantity >= Math.min(10, product.stock)}
-                        className="flex h-9 w-9 items-center justify-center rounded-full font-black text-primary transition hover:bg-white disabled:opacity-30"
-                        aria-label={`Aumentar quantidade de ${product.name}`}
-                      >
-                        +
-                      </button>
+                        {product.name}
+                      </Link>
+                      {variant ? (
+                        <p className="mt-2 text-sm font-black text-secondary">
+                          Opção: {variant.name}
+                        </p>
+                      ) : null}
+                      <p className="mt-3 text-sm text-text-light">
+                        {formatPrice(unitPrice)} por unidade
+                      </p>
                     </div>
 
-                    <p className="min-w-24 text-right font-display text-2xl text-primary">
-                      {formatPrice(product.price * quantity)}
-                    </p>
+                    <div className="flex flex-wrap items-center gap-3 sm:justify-end">
+                      <div className="inline-flex items-center rounded-full border border-border/60 bg-background p-1">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            updateQuantity(product.id, quantity - 1, variantId)
+                          }
+                          className="flex h-9 w-9 items-center justify-center rounded-full font-black text-primary transition hover:bg-white"
+                          aria-label={`Diminuir quantidade de ${product.name}`}
+                        >
+                          −
+                        </button>
+                        <span
+                          className="min-w-10 text-center font-black text-primary"
+                          aria-live="polite"
+                        >
+                          {quantity}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            updateQuantity(product.id, quantity + 1, variantId)
+                          }
+                          disabled={quantity >= Math.min(10, availableStock)}
+                          className="flex h-9 w-9 items-center justify-center rounded-full font-black text-primary transition hover:bg-white disabled:opacity-30"
+                          aria-label={`Aumentar quantidade de ${product.name}`}
+                        >
+                          +
+                        </button>
+                      </div>
 
-                    <button
-                      type="button"
-                      onClick={() => removeItem(product.id)}
-                      className="text-sm font-bold text-secondary hover:underline"
-                    >
-                      Remover
-                    </button>
+                      <p className="min-w-24 text-right font-display text-2xl text-primary">
+                        {formatPrice(unitPrice * quantity)}
+                      </p>
+
+                      <button
+                        type="button"
+                        onClick={() => removeItem(product.id, variantId)}
+                        className="text-sm font-bold text-secondary hover:underline"
+                      >
+                        Remover
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              ),
+            )}
 
             {orderBump ? (
               <section className="rounded-[2rem] border-2 border-dashed border-secondary/45 bg-secondary/5 p-6 sm:p-7">
@@ -362,9 +388,7 @@ export default function CarrinhoPage() {
             <div className="mt-6 space-y-4 border-b border-border/50 pb-6 text-sm">
               <div className="flex justify-between gap-4 text-text-light">
                 <span>Subtotal</span>
-                <strong className="text-primary">
-                  {formatPrice(subtotal)}
-                </strong>
+                <strong className="text-primary">{formatPrice(subtotal)}</strong>
               </div>
               {discount.tier.percent > 0 ? (
                 <div className="flex justify-between gap-4 text-secondary">
@@ -388,10 +412,7 @@ export default function CarrinhoPage() {
               </div>
             </div>
 
-            <CartCouponBox
-              subtotal={subtotal}
-              onCouponChange={setCouponCode}
-            />
+            <CartCouponBox subtotal={subtotal} onCouponChange={setCouponCode} />
 
             <div className="flex items-end justify-between gap-4 py-6">
               <span className="font-black text-primary">Total estimado</span>

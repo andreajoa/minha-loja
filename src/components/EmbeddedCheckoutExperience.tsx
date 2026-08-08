@@ -4,7 +4,7 @@ import Link from "next/link";
 import { loadStripe, type StripeEmbeddedCheckout } from "@stripe/stripe-js";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCart } from "@/components/CartProvider";
-import { calculateDiscount, formatMoney } from "@/lib/commerce";
+import { calculateDiscount, formatMoney, variantIdFor } from "@/lib/commerce";
 import { products } from "@/data/products";
 import { withBasePath } from "@/lib/paths";
 
@@ -42,14 +42,23 @@ export default function EmbeddedCheckoutExperience({
       items
         .map((item) => {
           const product = products.find((candidate) => candidate.id === item.id);
-          return product ? { ...item, product } : null;
+          if (!product) return null;
+          const variant =
+            item.variantId && product.variants?.length
+              ? product.variants.find(
+                  (candidate) =>
+                    variantIdFor(product, candidate) === item.variantId,
+                )
+              : undefined;
+          const unitPrice = variant ? variant.price : product.price;
+          return { ...item, product, variant, unitPrice };
         })
         .filter((item): item is NonNullable<typeof item> => Boolean(item)),
     [items],
   );
 
   const subtotal = detailedItems.reduce(
-    (total, line) => total + line.product.price * line.quantity,
+    (total, line) => total + line.unitPrice * line.quantity,
     0,
   );
   const localDiscount = calculateDiscount(subtotal, couponCode);
@@ -237,16 +246,17 @@ export default function EmbeddedCheckoutExperience({
               Resumo transparente
             </h2>
             <div className="mt-5 space-y-3 text-sm">
-              {detailedItems.map(({ product, quantity }) => (
+              {detailedItems.map(({ product, variant, variantId, unitPrice, quantity }) => (
                 <div
-                  key={product.id}
+                  key={`${product.id}:${variantId || "base"}`}
                   className="flex justify-between gap-3 border-b border-border/35 pb-3"
                 >
                   <span className="text-text-light">
                     {quantity}× {product.name}
+                    {variant ? ` · ${variant.name}` : ""}
                   </span>
                   <strong className="text-primary">
-                    {formatMoney(product.price * quantity)}
+                    {formatMoney(unitPrice * quantity)}
                   </strong>
                 </div>
               ))}
