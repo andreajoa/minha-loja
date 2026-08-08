@@ -1,4 +1,11 @@
-export type ProductVariant = { name: string; stock: number; price: number };
+export type ProductVariant = {
+  sourceSkuId?: string;
+  name: string;
+  stock: number;
+  price: number;
+  attributes?: Record<string, string>;
+  image?: string | null;
+};
 
 export type Product = {
   id: string;

@@ -34,7 +34,16 @@ export function variantIdFor(
   product: Product,
   variant: NonNullable<Product["variants"]>[number],
 ) {
-  const index = product.variants?.indexOf(variant) ?? -1;
+  const sourceSkuId =
+    variant.sourceSkuId?.trim();
+
+  if (sourceSkuId) {
+    return `sku-${sourceSkuId}`;
+  }
+
+  const index =
+    product.variants?.indexOf(variant) ?? -1;
+
   return `variant-${Math.max(0, index)}`;
 }
 
