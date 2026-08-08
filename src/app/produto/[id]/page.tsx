@@ -20,9 +20,32 @@ export async function generateMetadata({
 
   if (!product) return { title: "Produto não encontrado" };
 
+  const productPath = `/produto/${encodeURIComponent(product.id)}`;
+  const socialImages = product.image
+    ? [{ url: product.image, alt: product.name }]
+    : undefined;
+
   return {
     title: product.name,
     description: product.description,
+    alternates: {
+      canonical: productPath,
+    },
+    openGraph: {
+      title: product.name,
+      description: product.description,
+      url: productPath,
+      siteName: "BrinqueTEAndo",
+      locale: "pt_BR",
+      type: "website",
+      ...(socialImages ? { images: socialImages } : {}),
+    },
+    twitter: {
+      card: socialImages ? "summary_large_image" : "summary",
+      title: product.name,
+      description: product.description,
+      ...(socialImages ? { images: socialImages.map((image) => image.url) } : {}),
+    },
   };
 }
 
