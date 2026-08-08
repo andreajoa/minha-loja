@@ -1,18 +1,46 @@
 import type { Metadata } from "next";
 import CollectionCatalogLoader from "@/components/CollectionCatalogLoader";
 import { categories, products } from "@/data/products";
+import { SITE_URL, breadcrumbJsonLd, jsonLd } from "@/lib/seo";
 
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "Coleções e brinquedos",
+  title: "Coleções e brinquedos para Autismo e TDAH",
   description:
-    "Encontre brinquedos sensoriais e pedagógicos por categoria, faixa etária, objetivo, disponibilidade e preço.",
+    "Encontre brinquedos sensoriais e pedagógicos por categoria, faixa etária, objetivo, disponibilidade e preço, com curadoria de Margareth Almeida, Neuropsicopedagoga.",
+  alternates: { canonical: "/colecoes" },
+  openGraph: {
+    title: "Brinquedos sensoriais e pedagógicos | BrinqueTEAndo",
+    description:
+      "Catálogo de brinquedos e recursos de brincar para crianças autistas, com TDAH e outras neurodivergências.",
+    url: "/colecoes",
+    type: "website",
+  },
 };
 
 export default function Colecoes() {
+  const itemList = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Catálogo BrinqueTEAndo",
+    numberOfItems: products.length,
+    itemListElement: products.map((product, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: `${SITE_URL}/produto/${product.id}`,
+      name: product.name,
+    })),
+  };
+  const breadcrumb = breadcrumbJsonLd([
+    { name: "Início", path: "/" },
+    { name: "Coleções e brinquedos", path: "/colecoes" },
+  ]);
+
   return (
     <div className="min-h-screen bg-background">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(itemList) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(breadcrumb) }} />
       <section className="hero-grid relative overflow-hidden border-b border-border/45 px-5 py-14 sm:py-18 lg:py-22">
         <div className="absolute left-[6%] top-12 hidden h-16 w-16 animate-float items-center justify-center rounded-[35%] bg-white/80 text-3xl shadow-lg lg:flex" aria-hidden="true">🧩</div>
         <div className="absolute right-[8%] top-16 hidden h-14 w-14 animate-float-slow items-center justify-center rounded-full border border-secondary-light/30 bg-white/80 text-2xl lg:flex" aria-hidden="true">⭐</div>
@@ -29,7 +57,7 @@ export default function Colecoes() {
               Encontre o brinquedo que combina com <em className="font-normal text-secondary">este momento da criança.</em>
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-7 text-text-light sm:text-lg">
-              Pesquise pelo nome ou filtre por categoria, idade, objetivo do brincar, disponibilidade e preço. Tudo foi organizado para tornar a escolha mais simples e consciente.
+              Pesquise pelo nome ou filtre por categoria, idade, objetivo do brincar, disponibilidade e preço. Brinquedos sensoriais, pedagógicos e outros recursos organizados para apoiar escolhas mais conscientes para crianças autistas, com TDAH e outras neurodivergências.
             </p>
           </div>
 
