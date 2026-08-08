@@ -71,6 +71,11 @@ export async function GET() {
             adapter: "github-json-catalog-v1",
             catalogPath: "src/data/store-manager-products.json",
             editorialAssetsDir: "public/products/catalog",
+            preview: {
+              provider: "vercel",
+              projectId: "prj_L95FMm4jDk0lA8aGbp13jHediGRS",
+              teamId: "team_ZBA7HYCk2mFzh7ch32M0OkUP",
+            },
           },
         },
       },
