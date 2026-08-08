@@ -36,9 +36,11 @@ export default function Footer() {
         </div>
 
         <div>
-          <h3 className="font-display text-3xl">Informações</h3>
+          <h3 className="font-display text-3xl">Guias e informações</h3>
           <ul className="mt-5 space-y-2 text-sm text-text-light">
-            <li><Link href="/sobre" className="hover:text-secondary">Nossa curadoria</Link></li>
+            <li><Link href="/guia/brinquedos-autismo-tdah" className="font-bold text-secondary hover:underline">Como escolher brinquedos para autismo e TDAH</Link></li>
+            <li><Link href="/brinquedos-autismo-tdah-sao-paulo" className="font-bold text-secondary hover:underline">Brinquedos para autismo e TDAH em São Paulo</Link></li>
+            <li><Link href="/sobre" className="hover:text-secondary">Margareth Almeida e nossa curadoria</Link></li>
             <li><Link href="/contato" className="hover:text-secondary">Contato</Link></li>
             <li><Link href="/politicas/pagamento-seguranca" className="hover:text-secondary">Pagamento e segurança</Link></li>
             <li><Link href="/politicas/envio" className="hover:text-secondary">Envio e entrega</Link></li>
@@ -62,9 +64,10 @@ export default function Footer() {
             </a>
           </p>
           <p className="mt-6 text-sm leading-6 text-text-light">
-            Curadoria de <strong className="text-primary">Margareth Almeida</strong><br />
+            Curadoria de <Link href="/sobre" className="font-bold text-primary hover:text-secondary">Margareth Almeida</Link><br />
             Neuropsicopedagoga
           </p>
+          <p className="mt-4 text-xs leading-5 text-text-light">Loja online com foco no Litoral de São Paulo, Baixada Santista e Grande São Paulo.</p>
           <div className="mt-7 flex flex-wrap gap-4 lg:justify-end">
             <a href="https://www.instagram.com/neuromargarethapoio/" target="_blank" rel="noreferrer" className="nav-link text-xs font-black uppercase tracking-[0.16em] hover:text-secondary">Instagram</a>
             <a href="https://www.tiktok.com/@neuromargarethapoio" target="_blank" rel="noreferrer" className="nav-link text-xs font-black uppercase tracking-[0.16em] hover:text-secondary">TikTok</a>
