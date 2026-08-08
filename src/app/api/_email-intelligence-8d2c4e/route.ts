@@ -23,6 +23,8 @@ export async function GET() {
     }
   }
 
+  const trackingError = "error" in after ? after.error || "" : "";
+
   return NextResponse.json({
     ok: webhook.enabled && !activationError,
     webhook: { enabled: webhook.enabled, id: webhook.id || "", error: webhook.error || "" },
@@ -32,7 +34,7 @@ export async function GET() {
       clickTracking: after.clickTracking,
       trackingSubdomain: after.trackingSubdomain,
       trackingRecord: after.trackingRecord || null,
-      error: after.error || activationError || "",
+      error: trackingError || activationError || "",
     },
   });
 }
