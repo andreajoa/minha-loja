@@ -4,7 +4,7 @@ import { products } from "@/data/products";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const CONNECTOR_VERSION = "1.1.0";
+const CONNECTOR_VERSION = "1.2.0";
 const PROTOCOL_VERSION = "2026-08-01";
 
 export async function GET() {
@@ -65,6 +65,13 @@ export async function GET() {
           editorialAssets: true,
           previewPublication: true,
           githubManagedCatalog: true,
+          publicationTarget: {
+            contractVersion: "1",
+            kind: "github-catalog",
+            adapter: "github-json-catalog-v1",
+            catalogPath: "src/data/store-manager-products.json",
+            editorialAssetsDir: "public/products/catalog",
+          },
         },
       },
       timestamp: new Date().toISOString(),
