@@ -2,6 +2,7 @@ import Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { recordAnalyticsPurchase } from "@/lib/analytics-db";
+import { attributeEmailPurchase } from "@/lib/email-intelligence";
 
 export const runtime = "nodejs";
 
@@ -30,6 +31,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ received: true });
     }
 
+    const email = session.customer_details?.email || session.customer_email || "";
+
     try {
       await recordAnalyticsPurchase({
         eventId: `stripe:${event.id}`,
@@ -43,7 +46,18 @@ export async function POST(req: Request) {
       console.error("Purchase analytics exception:", analyticsError);
     }
 
-    const email = session.customer_details?.email || session.customer_email || "";
+    if (email) {
+      try {
+        await attributeEmailPurchase({
+          recipientEmail: email,
+          orderId: session.id,
+          revenueCents: session.amount_total || 0,
+        });
+      } catch (emailAnalyticsError) {
+        console.error("Email attribution exception:", emailAnalyticsError);
+      }
+    }
+
     if (!email || !resendKey) return NextResponse.json({ received: true });
 
     const resend = new Resend(resendKey);
