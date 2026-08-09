@@ -2,6 +2,10 @@
 
 Loja de brinquedos sensoriais e pedagógicos construída com Next.js 16, Clerk, Stripe, Resend e Cloudflare R2.
 
+## Identidade visual
+
+O favicon da marca é definido por `src/app/icon.svg`. Não mantenha um `favicon.ico` adicional em `src/app`, pois os dois arquivos podem ser publicados simultaneamente pelo Next.js.
+
 A aplicação foi configurada para funcionar no subcaminho:
 
 ```text
