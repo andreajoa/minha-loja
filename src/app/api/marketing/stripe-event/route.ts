@@ -6,6 +6,10 @@ import { attributeEmailPurchase } from "@/lib/email-intelligence";
 
 export const runtime = "nodejs";
 
+function belongsToBrinqueteando(session: Stripe.Checkout.Session) {
+  return session.metadata?.store === "brinqueteando";
+}
+
 export async function POST(req: Request) {
   try {
     const stripeKey = process.env.STRIPE_SECRET_KEY;
@@ -27,6 +31,17 @@ export async function POST(req: Request) {
 
     const eventSession = event.data.object as Stripe.Checkout.Session;
     const session = await stripe.checkout.sessions.retrieve(eventSession.id);
+
+    // A mesma conta Stripe atende mais de um projeto. Este endpoint só pode
+    // registrar compras criadas pelo checkout da BrinqueTEAndo.
+    if (!belongsToBrinqueteando(session)) {
+      return NextResponse.json({
+        received: true,
+        ignored: true,
+        reason: "foreign_checkout",
+      });
+    }
+
     if (session.payment_status !== "paid") {
       return NextResponse.json({ received: true });
     }
