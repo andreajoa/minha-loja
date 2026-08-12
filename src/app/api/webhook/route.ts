@@ -129,6 +129,16 @@ export async function POST(req: Request) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
 
+    // Esta conta Stripe atende outros projetos. O webhook da loja deve
+    // ignorar qualquer checkout que não tenha sido criado pela BrinqueTEAndo.
+    if (session.metadata?.store !== "brinqueteando") {
+      return NextResponse.json({
+        received: true,
+        ignored: true,
+        reason: "foreign_checkout",
+      });
+    }
+
     if (session.payment_status === "paid") {
       if (!resendApiKey) {
         return NextResponse.json(
