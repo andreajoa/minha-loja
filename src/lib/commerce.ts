@@ -30,6 +30,47 @@ export const DISCOUNT_TIERS: DiscountTier[] = [
   { minimum: 50_000, percent: 20, label: "20% de desconto" },
 ];
 
+/**
+ * Returns the effective stock for a product or variant, overlaying live
+ * inventory data pushed by the Store Manager when running server-side.
+ * On the client the static catalog stock is used as a fallback.
+ */
+function getEffectiveStock(
+  product: Product,
+  variant?: NonNullable<Product["variants"]>[number] | null,
+): number {
+  if (typeof window === "undefined") {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const cache = require("./inventory-cache") as {
+        getVariantStock: (
+          productId: string,
+          skuId: string,
+        ) => { stock: number; available: boolean } | null;
+        getProductStock: (
+          productId: string,
+        ) => { variants: Array<{ stock: number; available: boolean }> } | null;
+      };
+
+      if (variant?.sourceSkuId) {
+        const cached = cache.getVariantStock(product.id, variant.sourceSkuId);
+        if (cached !== null) return cached.available ? cached.stock : 0;
+      } else if (!variant) {
+        const cached = cache.getProductStock(product.id);
+        if (cached) {
+          return cached.variants.reduce(
+            (sum, v) => sum + (v.available ? v.stock : 0),
+            0,
+          );
+        }
+      }
+    } catch {
+      // Inventory cache unavailable — use static stock
+    }
+  }
+  return variant ? variant.stock : product.stock;
+}
+
 export function variantIdFor(
   product: Product,
   variant: NonNullable<Product["variants"]>[number],
@@ -68,7 +109,7 @@ export function resolveCartLine(line: CartLine) {
       variants.find(
         (candidate) => variantIdFor(product, candidate) === line.variantId,
       ) ||
-      variants.find((candidate) => candidate.stock > 0) ||
+      variants.find((candidate) => getEffectiveStock(product, candidate) > 0) ||
       null;
 
     if (!variant) {
@@ -78,7 +119,7 @@ export function resolveCartLine(line: CartLine) {
 
   const variantId = variant ? variantIdFor(product, variant) : undefined;
   const unitPrice = variant ? variant.price : product.price;
-  const availableStock = variant ? variant.stock : product.stock;
+  const availableStock = getEffectiveStock(product, variant);
 
   if (availableStock <= 0 || quantity > availableStock) {
     throw new Error(
@@ -212,7 +253,7 @@ export function formatMoney(amount: number) {
 
 function notInCart(cartIds: Set<string>) {
   return products.filter(
-    (product) => product.stock > 0 && !cartIds.has(product.id),
+    (product) => getEffectiveStock(product) > 0 && !cartIds.has(product.id),
   );
 }
 
@@ -265,7 +306,7 @@ export function getPostPurchaseRecommendations(
 ) {
   const purchased = new Set(purchasedIds);
   return products
-    .filter((product) => product.stock > 0 && !purchased.has(product.id))
+    .filter((product) => getEffectiveStock(product) > 0 && !purchased.has(product.id))
     .sort((a, b) => a.price - b.price)
     .slice(0, limit);
 }

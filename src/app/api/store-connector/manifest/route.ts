@@ -4,7 +4,7 @@ import { products } from "@/data/products";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const CONNECTOR_VERSION = "1.1.0";
+const CONNECTOR_VERSION = "1.2.0";
 const PROTOCOL_VERSION = "2026-08-01";
 
 export async function GET() {
@@ -65,6 +65,14 @@ export async function GET() {
           editorialAssets: true,
           previewPublication: true,
           githubManagedCatalog: true,
+          inventorySync: {
+            endpointPath: "/api/store-connector/inventory",
+            authToken: process.env.STORE_CONNECTOR_SYNC_TOKEN || "",
+          },
+          trackingSync: {
+            endpointPath: "/api/store-connector/tracking",
+            authToken: process.env.STORE_CONNECTOR_SYNC_TOKEN || "",
+          },
         },
       },
       timestamp: new Date().toISOString(),
