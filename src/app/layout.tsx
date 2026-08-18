@@ -35,10 +35,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ClerkProvider
-      signInFallbackRedirectUrl="/"
-      signUpFallbackRedirectUrl="/"
-    >
+    <ClerkProvider>
       <html lang="pt-BR">
         <body className="flex min-h-screen flex-col antialiased">
           <CartProvider>
