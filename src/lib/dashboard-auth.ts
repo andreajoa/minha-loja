@@ -28,13 +28,17 @@ export async function requireDashboardAdmin() {
   const authorizedByUserId = allowedUserIds.includes(state.userId);
 
   const allowedEmails = getAllowedDashboardEmails();
-  const authorizedEmail = user?.emailAddresses.find(
-    (item) =>
-      allowedEmails.includes(item.emailAddress.toLowerCase()) &&
-      item.verification?.status === "verified",
+  const authorizedEmail = user?.emailAddresses.find((item) =>
+    allowedEmails.includes(item.emailAddress.toLowerCase()),
   );
 
-  if (!authorizedByUserId && !authorizedEmail) notFound();
+  if (!authorizedByUserId && !authorizedEmail) {
+    console.warn("Dashboard access denied", {
+      userId: state.userId,
+      emails: user?.emailAddresses.map((item) => item.emailAddress.toLowerCase()) || [],
+    });
+    notFound();
+  }
 
   const primaryEmail =
     authorizedEmail?.emailAddress.toLowerCase() ||
