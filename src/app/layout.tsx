@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CookieBar from "@/components/CookieBar";
 import CartProvider from "@/components/CartProvider";
+import Tracker from "@/components/Tracker";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.adhdautism.online"),
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <main className="flex-1">{children}</main>
             <Footer />
             <CookieBar />
+            <Tracker />
           </CartProvider>
         </body>
       </html>

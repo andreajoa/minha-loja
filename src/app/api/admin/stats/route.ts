@@ -1,23 +1,13 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { products } from "@/data/products";
 
 export const runtime = "nodejs";
 
-function getAdminIds(): string[] {
-  return (process.env.ADMIN_CLERK_USER_IDS || "")
-    .split(",")
-    .map((v) => v.trim())
-    .filter(Boolean);
-}
-
 export async function GET() {
-  const { userId } = await auth();
-  const allowedUsers = getAdminIds();
-
-  if (!userId || !allowedUsers.includes(userId)) {
-    return NextResponse.json({ error: "Acesso não autorizado." }, { status: 403 });
+  if (!(await isAdminAuthenticated())) {
+    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;

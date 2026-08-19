@@ -1,22 +1,12 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+import { isAdminAuthenticated } from "@/lib/admin-auth";
 
 export const runtime = "nodejs";
 
-function getAdminIds(): string[] {
-  return (process.env.ADMIN_CLERK_USER_IDS || "")
-    .split(",")
-    .map((v) => v.trim())
-    .filter(Boolean);
-}
-
 export async function GET(req: Request) {
-  const { userId } = await auth();
-  const allowedUsers = getAdminIds();
-
-  if (!userId || !allowedUsers.includes(userId)) {
-    return NextResponse.json({ error: "Acesso não autorizado." }, { status: 403 });
+  if (!(await isAdminAuthenticated())) {
+    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
@@ -41,6 +31,8 @@ export async function GET(req: Request) {
     currency: session.currency,
     customerName: session.customer_details?.name || "—",
     customerEmail: session.customer_details?.email || "—",
+    city: session.customer_details?.address?.city || "—",
+    state: session.customer_details?.address?.state || "—",
     paymentStatus: session.payment_status,
     items:
       session.line_items?.data.map((item) => ({
