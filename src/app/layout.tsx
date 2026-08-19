@@ -76,7 +76,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ClerkProvider proxyUrl="/__clerk">
+    <ClerkProvider>
       <html lang="pt-BR">
         <body className="flex min-h-screen flex-col antialiased">
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(organizationJsonLd()) }} />
