@@ -2,6 +2,10 @@ import Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { normalizeCart, serializeCart, type CartLine } from "@/lib/commerce";
 import { BASE_PATH } from "@/lib/paths";
+import {
+  releaseManagedCheckoutReservation,
+  reserveManagedCheckout,
+} from "@/lib/store-manager-reservations";
 
 export const runtime = "nodejs";
 
@@ -21,6 +25,7 @@ export async function POST(req: Request) {
     }
 
     const normalizedCart = normalizeCart(payload.cart);
+    const reservation = await reserveManagedCheckout(normalizedCart);
     const stripe = new Stripe(stripeSecretKey);
     const requestUrl = new URL(req.url);
     const appUrl = (
@@ -32,12 +37,14 @@ export async function POST(req: Request) {
       Number.parseInt(process.env.SHIPPING_FEE_CENTS || "1990", 10) || 0,
     );
 
-    const session = await stripe.checkout.sessions.create({
+    let session: Stripe.Checkout.Session;
+    try {
+      session = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card"],
       customer_creation: "always",
       billing_address_collection: "required",
-      shipping_address_collection: { allowed_countries: ["BR"] },
+      shipping_address_collection: { allowed_countries: ["US", "CA", "GB", "AU", "NZ"] },
       phone_number_collection: { enabled: true },
       line_items: normalizedCart.map(
         ({ product, variant, variantId, unitPrice, quantity }) => ({
@@ -72,13 +79,32 @@ export async function POST(req: Request) {
       ],
       success_url: `${appUrl}/sucesso?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/carrinho`,
+      ...(reservation.checkoutExpiresAt
+        ? { expires_at: Math.floor(reservation.checkoutExpiresAt.getTime() / 1000) }
+        : {}),
       metadata: {
         store: "brinqueteando",
         cart: serializeCart(payload.cart),
+        ...(reservation.reservationId
+          ? { store_manager_reservation_id: reservation.reservationId }
+          : {}),
+      },
+      payment_intent_data: {
+        metadata: {
+          store: "brinqueteando",
+          ...(reservation.reservationId
+            ? { store_manager_reservation_id: reservation.reservationId }
+            : {}),
+        },
       },
     });
+    } catch (error) {
+      await releaseManagedCheckoutReservation(reservation.reservationId);
+      throw error;
+    }
 
     if (!session.url) {
+      await releaseManagedCheckoutReservation(reservation.reservationId);
       return NextResponse.json(
         { error: "A Stripe não retornou uma página de pagamento." },
         { status: 502 },
